@@ -35,17 +35,21 @@ hostnamectl set-hostname "$SERVER_HOSTNAME"
 echo -e "\e[1;32mdone\e[0m"
 
 ################# Packages #################
-echo -n "Updating system... "
-apt -qq update -y > apt-update.log 2>&1
-echo -e "\e[1;32mdone\e[0m"
+if dpkg -l | grep -q "^ii  bind9 "; then
+    echo "bind9 is already installed, skipping apt..."
+else
+    echo -n "Updating system... "
+    apt -qq update -y > apt-update.log 2>&1
+    echo -e "\e[1;32mdone\e[0m"
 
-echo -n "Upgrading system... "
-apt -qq upgrade -y > apt-upgrade.log 2>&1
-echo -e "\e[1;32mdone\e[0m"
+    echo -n "Upgrading system... "
+    apt -qq upgrade -y > apt-upgrade.log 2>&1
+    echo -e "\e[1;32mdone\e[0m"
 
-echo -n "Installing packages... "
-apt -qq install -y bind9 > apt-install.log 2>&1
-echo -e "\e[1;32mdone\e[0m"
+    echo -n "Installing packages... "
+    apt -qq install -y bind9 > apt-install.log 2>&1
+    echo -e "\e[1;32mdone\e[0m"
+fi
  
 ############### Networking ################
 echo -n "Setting up networking... "
