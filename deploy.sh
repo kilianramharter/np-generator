@@ -5,7 +5,7 @@ IPv4_SERVER_IP=180.1.10.1
 IPV4_SERVER_SUBNETMASK=24
 IPV4_SERVER_GATEWAY=180.1.10.254
 SERVER_INTERFACE=ens33
-SERVER_HOSTNAME=ROOT_DNS
+SERVER_HOSTNAME=ROOT-DNS
 #SERVER_INTERFACE=$(ip -o link show | awk -F': ' '{print $2}' | grep ens | head -n1)
     
 ###########################################
@@ -15,11 +15,18 @@ SERVER_HOSTNAME=ROOT_DNS
 
 # HINT! Run Script only as "sudo su"!
 if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
+  then echo -e "\033[1mPlease run as root\033[0m"
   exit
 fi
 
-echo "Your PATH is $PATH"
+echo -e "\033[1mThe following settings will be applied:\033[0m"
+echo "IP ADDRESS:\t${IPV4_SERVER_IP}/${IPV4_SERVER_SUBNETMASK}"
+echo "IP GATEWAY:\t${IPV4_SERVER_GATEWAY}"
+echo "IP IFACE:  \t${SERVER_INTERFACE}"
+echo "HOSTNAME:  \t${SERVER_HOSTNAME}"
+
+echo -en "\033[1;31mPRESS ENTER TO CONFIRM...\033[0m"
+read
 
 ################# Hostname #################
 echo -n "Setting hostname... "
@@ -50,7 +57,7 @@ network:
   ethernets:
     $SERVER_INTERFACE:
       addresses:
-        - $IPv4_SERVER_IP/$IPV4_SERVER_SUBNETMASK
+        - $IPV4_SERVER_IP/$IPV4_SERVER_SUBNETMASK
       routes:
         - to: default
           via: $IPV4_SERVER_GATEWAY
@@ -62,5 +69,6 @@ netplan apply
 echo -e "\e[1;32mdone\e[0m"
 
 ############### Reboot ################
-echo "Rebooting system..."
+echo "Rebooting system in 5 seconds..."
+sleep 5
 reboot
