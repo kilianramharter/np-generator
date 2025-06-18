@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Preparation - Set IP before running:
-IPv4_SERVER_IP=180.1.10.1
+IPV4_SERVER_IP=180.1.10.1
 IPV4_SERVER_SUBNETMASK=24
 IPV4_SERVER_GATEWAY=180.1.10.254
 SERVER_INTERFACE=ens33
@@ -20,10 +20,10 @@ if [ "$EUID" -ne 0 ]
 fi
 
 echo -e "\033[1mThe following settings will be applied:\033[0m"
-echo "IP ADDRESS:\t${IPV4_SERVER_IP}/${IPV4_SERVER_SUBNETMASK}"
-echo "IP GATEWAY:\t${IPV4_SERVER_GATEWAY}"
-echo "IP IFACE:  \t${SERVER_INTERFACE}"
-echo "HOSTNAME:  \t${SERVER_HOSTNAME}"
+echo -e "IP ADDRESS:\t${IPV4_SERVER_IP}/${IPV4_SERVER_SUBNETMASK}"
+echo -e "IP GATEWAY:\t${IPV4_SERVER_GATEWAY}"
+echo -e "IP IFACE:  \t${SERVER_INTERFACE}"
+echo -e "HOSTNAME:  \t${SERVER_HOSTNAME}"
 
 echo -en "\033[1;31mPRESS ENTER TO CONFIRM...\033[0m"
 read
