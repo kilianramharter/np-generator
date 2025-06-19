@@ -6,6 +6,7 @@ IPV4_SERVER_SUBNETMASK=24
 IPV4_SERVER_GATEWAY=180.1.10.254
 SERVER_INTERFACE=ens33
 SERVER_HOSTNAME=ROOT-DNS
+BIND_SETUP_ROOT_HINTS=1
 #SERVER_INTERFACE=$(ip -o link show | awk -F': ' '{print $2}' | grep ens | head -n1)
     
 ###########################################
@@ -20,12 +21,16 @@ if [ "$EUID" -ne 0 ]
 fi
 
 echo -e "\033[1mThe following settings will be applied:\033[0m"
+echo -e "============ SERVER ============"
 echo -e "IP ADDRESS:\t${IPV4_SERVER_IP}/${IPV4_SERVER_SUBNETMASK}"
 echo -e "IP GATEWAY:\t${IPV4_SERVER_GATEWAY}"
 echo -e "IP IFACE:  \t${SERVER_INTERFACE}"
 echo -e "HOSTNAME:  \t${SERVER_HOSTNAME}"
 
-echo -en "\033[1;31mPRESS ENTER TO CONFIRM...\033[0m"
+echo -e "\n============ BIND9 ============="
+echo -e "BIND9 ROOT.HINTS: \t${BIND_SETUP_ROOT_HINTS}";
+
+echo -en "\n\033[1;31mPRESS ENTER TO CONFIRM...\033[0m"
 read
 
 ################# Hostname #################
@@ -71,6 +76,19 @@ EOF
 
 netplan apply
 echo -e "\e[1;32mdone\e[0m"
+
+############# BIND9-Setup #############
+if BIND_SETUP_ROOT_HINTS; then
+    echo -n "Configuring root.hints... "
+    cat > /etc/bind/root.hints <<EOF
+.               3600000      NS    nsroot.
+nsroot.         3600000      A     180.1.10.1
+EOF
+    sed -i 's#("/)usr/share/dns/root.hints(");#\1etc/bind/root.hints\2;#'
+    echo -e "\e[1;32mdone\e[0m"
+else
+    echo "Skipping root.hints setup..."
+fi
 
 ############### Reboot ################
 echo "Rebooting system in 5 seconds..."
