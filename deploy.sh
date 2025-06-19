@@ -27,10 +27,12 @@ fi
 
 echo -e "\033[1mThe following settings will be applied:\033[0m"
 echo -e "============ SERVER ============"
-echo -e "IP ADDRESS:\t${IPV4_SERVER_IP}/${IPV4_SERVER_SUBNETMASK}"
-echo -e "IP GATEWAY:\t${IPV4_SERVER_GATEWAY}"
-echo -e "IP IFACE:  \t${SERVER_INTERFACE}"
-echo -e "HOSTNAME:  \t${SERVER_HOSTNAME}"
+echo -e "IPv4 ADDRESS:\t${IPV4_SERVER_IP}/${IPV4_SERVER_SUBNETMASK}"
+echo -e "IPv4 GATEWAY:\t${IPV4_SERVER_GATEWAY}"
+echo -e "IPv6 ADDRESS:\t${IPV6_SERVER_IP}/${IPV6_SERVER_SUBNETMASK}"
+echo -e "IPv6 GATEWAY:\t${IPV6_SERVER_GATEWAY}"
+echo -e "IP IFACE:    \t${SERVER_INTERFACE}"
+echo -e "HOSTNAME:    \t${SERVER_HOSTNAME}"
 
 echo -e "\n============ BIND9 ============="
 echo -e "BIND9 ROOT.HINTS: \t${BIND_SETUP_ROOT_HINTS}";
@@ -76,7 +78,8 @@ network:
       routes:
         - to: default
           via: $IPV4_SERVER_GATEWAY
-      gateway6: $IPV6_SERVER_GATEWAY
+        - to: default
+          via: $IPV6_SERVER_GATEWAY
       nameservers:
           addresses:
             - 127.0.0.1
