@@ -4,6 +4,11 @@
 IPV4_SERVER_IP=180.1.10.1
 IPV4_SERVER_SUBNETMASK=24
 IPV4_SERVER_GATEWAY=180.1.10.254
+
+IPV6_SERVER_IP=fd00::1
+IPV6_SERVER_SUBNETMASK=64
+IPV6_SERVER_GATEWAY=fd00::254
+
 SERVER_INTERFACE=ens33
 SERVER_HOSTNAME=ROOT-DNS
 BIND_SETUP_ROOT_HINTS=1
@@ -67,24 +72,28 @@ network:
     $SERVER_INTERFACE:
       addresses:
         - $IPV4_SERVER_IP/$IPV4_SERVER_SUBNETMASK
+        - $IPV6_SERVER_IP/$IPV6_SERVER_SUBNETMASK
       routes:
         - to: default
           via: $IPV4_SERVER_GATEWAY
+      gateway6: $IPV6_SERVER_GATEWAY
       nameservers:
-          addresses: [127.0.0.1]
+          addresses:
+            - 127.0.0.1
+            - ::1
 EOF
 
 netplan apply
 echo -e "\e[1;32mdone\e[0m"
 
 ############# BIND9-Setup #############
-if BIND_SETUP_ROOT_HINTS; then
+if [ "$BIND_SETUP_ROOT_HINTS" -eq "1" ]; then
     echo -n "Configuring root.hints... "
     cat > /etc/bind/root.hints <<EOF
 .               3600000      NS    nsroot.
 nsroot.         3600000      A     180.1.10.1
 EOF
-    sed -i 's#("/)usr/share/dns/root.hints(");#\1etc/bind/root.hints\2;#'
+    sed -i 's#/usr/share/dns/root.hints#/etc/bind/root.hints#' /etc/bind/named.conf.default-zones
     echo -e "\e[1;32mdone\e[0m"
 else
     echo "Skipping root.hints setup..."
