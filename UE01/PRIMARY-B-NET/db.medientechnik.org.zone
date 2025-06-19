@@ -1,0 +1,26 @@
+$TTL      60
+$ORIGIN   medientechnik.org.
+
+@                       IN  SOA       ns1.medientechnik.org.   postmaster.medientechnik.org. (
+                                          0     ; Serial Number
+                                          12h   ; Refresh Timer
+                                          15m   ; Update Retry
+                                          3w    ; Expiry
+                                          2h    ; Minimum
+                        )
+
+@                       IN  NS        ns1.medientechnik.org.
+@                       IN  NS        ns1.medientechnik.org.
+
+ns1.medientechnik.org.  IN  A         180.1.10.3
+ns2.medientechnik.org.  IN  A         180.1.10.4
+www.medientechnik.org.  IN  A         100.100.100.100
+mail.medientechnik.org. IN  A         100.100.100.200
+
+ns1.medientechnik.org.  IN  AAAA      fd00::3
+ns1.medientechnik.org.  IN  AAAA      fd00::4
+www.medientechnik.org.  IN  AAAA      fd00::100:100
+mail.medientechnik.org. IN  AAAA      fd00::100:200
+
+medientechnik.org.      IN  MX    10  mail.medientechnik.org.
+wm.medientechnik.org.   IN  CNAME     mail.medientechnik.org.

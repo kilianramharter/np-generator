@@ -1,0 +1,33 @@
+zone "org" {
+        type slave;
+        masters { 180.1.10.2; fd00::2; };
+        file "/var/cache/bind/db.org.zone";
+};
+
+zone "totallysecure.net" {
+        type slave;
+        masters { 180.1.10.2; fd00::2; };
+        file "/var/cache/bind/db.totallysecure.net.zone";
+};
+
+zone "net" {
+        type slave;
+        masters { 180.1.10.2; fd00::2; };
+        file "/var/cache/bind/db.net.zone";
+};
+
+zone "medientechnik.org" {
+        type slave;
+        masters { 180.1.10.2; fd00::2; };
+        file "/var/cache/bind/db.medientechnik.org.zone";
+};
+
+zone "100.100.100.in-addr.arpa" {
+        type master;
+        file "/etc/bind/zones/db.100.100.100.rev";
+};
+
+zone "200.200.200.in-addr.arpa" {
+        type master;
+        file "/etc/bind/zones/db.200.200.200.rev";
+};

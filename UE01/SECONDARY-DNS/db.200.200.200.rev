@@ -1,0 +1,15 @@
+$ORIGIN 200.200.200.in-addr.arpa.
+$TTL 1h
+
+@ IN SOA rev1.net. postmaster.rev1.net. (
+    2025061901 ; Serial
+    1h         ; Refresh
+    15m        ; Retry
+    1w         ; Expire
+    1h         ; Negative cache TTL
+)
+
+@       IN NS   rev1.org.
+
+200     IN PTR mail.totallysecure.net.
+100     IN PTR web.totallysecure.net.

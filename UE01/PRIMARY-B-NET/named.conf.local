@@ -1,0 +1,10 @@
+zone "net" {
+        type master;
+        file "/etc/bind/zones/db.net.zone";
+        allow-transfer { 180.1.10.4; fd00::4; };
+};
+zone "medientechnik.org" {
+	      type master;
+	      file "/etc/bind/zones/db.medientechnik.org.zone";
+	      allow-transfer { 180.1.10.4; fd00::4; };
+};

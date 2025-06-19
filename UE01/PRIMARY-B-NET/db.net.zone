@@ -1,0 +1,24 @@
+$TTL      60
+$ORIGIN   net.
+
+@                       IN  SOA     ns1.net.   postmaster.tld.net. (
+                                    0     ; Serial Number
+                                    12h   ; Refresh Timer
+                                    15m   ; Update Retry
+                                    3w    ; Expiry
+                                    2h    ; Minimum
+                        )
+
+@                       IN  NS  ns1.net.
+@                       IN  NS  ns2.net.
+totallysecure.net.      IN  NS  ns1.totallysecure.net.
+
+ns1.net.                IN  A     180.1.10.3
+ns2.net.                IN  A     180.1.10.4
+ns1.totallysecure.net.  IN  A     180.1.10.2
+ns2.totallysecure.net.  IN  A     180.1.10.4
+
+ns1.net.                IN  AAAA   fd00::3
+ns2.net.                IN  AAAA   fd00::4
+ns1.totallysecure.net.  IN  AAAA   fd00::2
+ns2.totallysecure.net.  IN  AAAA   fd00::4
