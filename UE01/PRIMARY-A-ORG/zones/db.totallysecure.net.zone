@@ -1,0 +1,26 @@
+$TTL      60
+$ORIGIN   totallysecure.net.
+
+@                       IN  SOA       ns1.totallysecure.net.   postmaster.totallysecure.net. (
+                                          0     ; Serial Number
+                                          12h   ; Refresh Timer
+                                          15m   ; Update Retry
+                                          3w    ; Expiry
+                                          2h    ; Minimum
+                        )
+
+@                       IN  NS        ns1.totallysecure.net.
+@                       IN  NS        ns2.totallysecure.net.
+
+ns1.totallysecure.net.  IN  A         180.1.10.2
+ns2.totallysecure.net.  IN  A         180.1.10.4
+www.totallysecure.net.  IN  A         200.200.200.100
+mail.totallysecure.net. IN  A         200.200.200.200
+
+ns1.totallysecure.net.  IN  AAAA      fd00::2
+ns2.totallysecure.net.  IN  AAAA      fd00::4
+www.totallysecure.net.  IN  AAAA      fd00::200:100
+mail.totallysecure.net. IN  AAAA      fd00::200:200
+
+totallysecure.net.      IN  MX    10  mail.totallysecure.net.
+wm.totallysecure.net    IN  CNAME     mail.totallysecure.net.

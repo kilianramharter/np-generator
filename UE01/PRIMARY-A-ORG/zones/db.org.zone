@@ -1,0 +1,25 @@
+$TTL      60
+$ORIGIN   org.
+
+@                       IN  SOA     ns1.org.   postmaster.tld.org. (
+                                    0     ; Serial Number
+                                    12h   ; Refresh Timer
+                                    15m   ; Update Retry
+                                    3w    ; Expiry
+                                    2h    ; Minimum
+                        )
+
+@                       IN  NS  ns1.org.
+@                       IN  NS  ns2.org.
+medientechnik.org.      IN  NS  ns1.medientechnik.org.
+medientechnik.org.      IN  NS  ns2.medientechnik.org.
+
+ns1.org.                IN  A       180.1.10.2
+ns2.org.                IN  A       180.1.10.4
+ns1.medientechnik.org.  IN  A       180.1.10.3
+ns2.medientechnik.org.  IN  A       180.1.10.4
+
+ns1.org.                IN  AAAA    fd00::2
+ns2.org.                IN  AAAA    fd00::4
+ns1.medientechnik.org.  IN  AAAA    fd00::3
+ns2.medientechnik.org.  IN  AAAA    fd00::4

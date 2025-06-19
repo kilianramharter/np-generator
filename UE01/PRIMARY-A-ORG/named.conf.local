@@ -1,0 +1,11 @@
+zone "org" {
+	type master;
+	file "/etc/bind/zones/db.org.zone";
+	allow-transfer { 180.1.10.4; fd00::4; };
+};
+
+zone "totallysecure.net" {
+	type master;
+	file "/etc/bind/zones/db.totallysecure.net.zone";
+	allow-transfer { 180.1.10.4; fd00::4; };
+};

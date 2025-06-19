@@ -1,0 +1,31 @@
+$TTL      60
+$ORIGIN   .
+
+@                       IN  SOA     nsroot.   postmaster.internet.com. (
+                          0     ; Serial Number
+                          12h   ; Refresh Timer
+                          15m   ; Update Retry
+                          3w    ; Expiry
+                          2h    ; Minimum
+                         )
+
+@                           IN  NS     nsroot.
+org.                        IN  NS     ns1.org.
+org.                        IN  NS     ns2.org.
+net.                        IN  NS     ns1.net.
+net.                        IN  NS     ns2.net.
+100.100.100.in-addr.arpa    IN  NS     rev1.org.
+200.200.200.in-addr.arpa    IN  NS     rev1.org.
+
+nsroot.                  IN  A      180.1.10.1
+ns1.org.                 IN  A      180.1.10.2
+ns2.org.                 IN  A      180.1.10.4
+ns1.net.                 IN  A      180.1.10.3
+ns2.net.                 IN  A      180.1.10.4
+rev1.org.                IN  A      180.1.10.4
+
+nsroot.                  IN  AAAA   fd00::1
+ns1.org.                 IN  AAAA   fd00::2
+ns2.org.                 IN  AAAA   fd00::4
+ns1.net.                 IN  AAAA   fd00::3
+ ns2.net.                 IN  AAAA   fd00::4
