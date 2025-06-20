@@ -32,15 +32,24 @@ fi
 
 echo -e "\033[1mThe following settings will be applied:\033[0m"
 echo -e "============ SERVER ============"
-echo -e "IPv4 ADDRESS:\t${IPV4_SERVER_IP}/${IPV4_SERVER_SUBNETMASK}"
-echo -e "IPv4 GATEWAY:\t${IPV4_SERVER_GATEWAY}"
+echo -e "IPv4 ADDRESS:   \t${IPV4_SERVER_IP}/${IPV4_SERVER_SUBNETMASK}"
+echo -e "IPv4 GATEWAY:   \t${IPV4_SERVER_GATEWAY}"
 echo -e "IPv4 NAMESERVER:\t${IPV4_SERVER_NAMESERVER}"
-echo -e "IPv6 ADDRESS:\t${IPV6_SERVER_IP}/${IPV6_SERVER_SUBNETMASK}"
-echo -e "IPv6 GATEWAY:\t${IPV6_SERVER_GATEWAY}"
+echo -e "IPv6 ADDRESS:   \t${IPV6_SERVER_IP}/${IPV6_SERVER_SUBNETMASK}"
+echo -e "IPv6 GATEWAY:   \t${IPV6_SERVER_GATEWAY}"
 echo -e "IPv6 NAMESERVER:\t${IPV6_SERVER_NAMESERVER}"
-echo -e "IP IFACE:    \t${SERVER_INTERFACE}"
-echo -e "HOSTNAME:    \t${SERVER_HOSTNAME}"
+echo -e "IP IFACE:       \t${SERVER_INTERFACE}"
+echo -e "HOSTNAME:       \t${SERVER_HOSTNAME}"
 
+echo -e "============ POSTFIX ==========="
+echo -e "DOMAIN:        \t${SERVER_HOSTNAME}"
+echo -e "HOSTNAME:      \t${HOSTNAME}"
+echo -e "MAILTYPE:      \t${MAILTYPE}"
+echo -en "USERS:        \t$"
+for item in "${MAIL_USERS[@]}"; do
+  echo -n "$item, "
+done
+echo ""
 
 echo -en "\n\033[1;31mPRESS ENTER TO CONFIRM...\033[0m"
 read
