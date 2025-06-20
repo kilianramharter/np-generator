@@ -34,8 +34,6 @@ echo -e "IPv6 GATEWAY:\t${IPV6_SERVER_GATEWAY}"
 echo -e "IP IFACE:    \t${SERVER_INTERFACE}"
 echo -e "HOSTNAME:    \t${SERVER_HOSTNAME}"
 
-echo -e "\n============ BIND9 ============="
-echo -e "BIND9 ROOT.HINTS: \t${BIND_SETUP_ROOT_HINTS}";
 
 echo -en "\n\033[1;31mPRESS ENTER TO CONFIRM...\033[0m"
 read
@@ -89,19 +87,7 @@ EOF
 netplan apply
 echo -e "\e[1;32mdone\e[0m"
 
-############# BIND9-Setup #############
-if [ "$BIND_SETUP_ROOT_HINTS" -eq "1" ]; then
-    echo -n "Configuring root.hints... "
-    cat > /etc/bind/root.hints <<EOF
-.               3600000      NS    nsroot.
-nsroot.         3600000      A     180.1.10.1
-nsroot.         3600000      AAAA  fd00::1
-EOF
-    sed -i 's#/usr/share/dns/root.hints#/etc/bind/root.hints#' /etc/bind/named.conf.default-zones
-    echo -e "\e[1;32mdone\e[0m"
-else
-    echo "Skipping root.hints setup..."
-fi
+
 
 ############### Reboot ################
 echo "Rebooting system in 5 seconds..."
