@@ -67,7 +67,7 @@ else
     echo "postfix postfix/mailname string $DOMAIN" | debconf-set-selections
     echo "postfix postfix/main_mailer_type select $MAILTYPE" | debconf-set-selections
     export DEBIAN_FRONTEND=noninteractive
-    apt install -y postfix
+    apt -qq install -y postfix > apt-install-postfix.log 2>&1
     echo -e "\e[1;32mdone\e[0m"
 fi
 
