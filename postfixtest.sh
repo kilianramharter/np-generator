@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-postfix-on-ubuntu-20-04
+# http://www.postfix.org/STANDARD_CONFIGURATION_README.html
+# https://blog.stueber.de/posts/setup-postfix/
+
 DOMAIN="example.com"
 HOSTNAME="mail.example.com"
 MAILTYPE="Internet Site"  # Options: No configuration, Internet Site, Internet with smarthost, Satellite system, Local only
