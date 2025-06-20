@@ -13,6 +13,11 @@ IPV6_SERVER_GATEWAY=fd00::254
 
 SERVER_INTERFACE=ens33
 SERVER_HOSTNAME=ROOT-MX
+
+DOMAIN="example.com"
+HOSTNAME="mail.example.com"
+MAILTYPE="Internet Site"  # Options: No configuration, Internet Site, Internet with smarthost, Satellite system, Local only
+MAIL_USERS=("user1")
     
 ###########################################
 # Script for Ubuntu Postfix Preparation #
@@ -58,11 +63,25 @@ else
     apt -qq upgrade -y > apt-upgrade.log 2>&1
     echo -e "\e[1;32mdone\e[0m"
 
-    echo -n "Installing packages... "
-    apt -qq install -y postfix > apt-install.log 2>&1
+    echo -n "Installing packages... "    
+    echo "postfix postfix/mailname string $DOMAIN" | debconf-set-selections
+    echo "postfix postfix/main_mailer_type select $MAILTYPE" | debconf-set-selections
+    export DEBIAN_FRONTEND=noninteractive
+    apt install -y postfix
     echo -e "\e[1;32mdone\e[0m"
 fi
- 
+
+############## Configuration ##############
+echo -n "Configuring postfix... "
+postconf -e "myhostname=$HOSTNAME"
+echo -e "\e[1;32mdone\e[0m"
+
+echo -n "Creating users... "
+for item in "${MAIL_USERS[@]}"; do
+    useradd -m -s /bin/bash $item
+done
+echo -e "\e[1;32mdone\e[0m"
+
 ############### Networking ################
 echo -n "Setting up networking... "
 
@@ -88,8 +107,6 @@ EOF
 
 netplan apply
 echo -e "\e[1;32mdone\e[0m"
-
-
 
 ############### Reboot ################
 echo "Rebooting system in 5 seconds..."
