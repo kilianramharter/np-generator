@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MAILNAME="mail.example.com"
+MAILNAME="example.com"
 MAILTYPE="Internet Site"  # Options: No configuration, Internet Site, Internet with smarthost, Satellite system, Local only
 
 echo "postfix postfix/mailname string $MAILNAME" | debconf-set-selections
