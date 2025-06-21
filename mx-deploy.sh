@@ -18,6 +18,7 @@ DOMAIN="example.com"
 HOSTNAME="mail.example.com"
 MAILTYPE="Internet Site"  # Options: No configuration, Internet Site, Internet with smarthost, Satellite system, Local only
 MAIL_USERS=("user1")
+DEFAULT_USER_PASS="student"
     
 ###########################################
 # Script for Ubuntu Postfix Preparation #
@@ -85,11 +86,12 @@ echo -n "Configuring postfix... "
 postconf -e "myhostname=$HOSTNAME"
 echo -e "\e[1;32mdone\e[0m"
 
-echo -n "Creating users... "
-for item in "${MAIL_USERS[@]}"; do
-    useradd -m -s /bin/bash $item
+for MAILUSER in "${MAIL_USERS[@]}"; do
+    echo -n "Creating users $MAILUSER... "
+    useradd -M -s /usr/sbin/nologin $MAILUSER
+    echo "$MAILUSER:$DEFAULT_USER_PASS" | chpasswd
+    echo -e "\e[1;32mdone\e[0m"
 done
-echo -e "\e[1;32mdone\e[0m"
 
 ############### Networking ################
 echo -n "Setting up networking... "
