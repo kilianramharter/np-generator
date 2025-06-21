@@ -73,11 +73,15 @@ else
     apt -qq upgrade -y > apt-upgrade.log 2>&1
     echo -e "\e[1;32mdone\e[0m"
 
-    echo -n "Installing packages... "    
+    echo -n "Installing package postfix... "    
     echo "postfix postfix/mailname string $DOMAIN" | debconf-set-selections
     echo "postfix postfix/main_mailer_type select $MAILTYPE" | debconf-set-selections
     export DEBIAN_FRONTEND=noninteractive
     apt -qq install -y postfix > apt-install-postfix.log 2>&1
+    echo -e "\e[1;32mdone\e[0m"
+
+    echo -n "Installing package dovecot... "
+    apt -qq install -y dovecot-imapd dovecot-pop3d > apt-install-dovecot.log 2>&1
     echo -e "\e[1;32mdone\e[0m"
 fi
 
