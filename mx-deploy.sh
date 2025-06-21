@@ -83,12 +83,16 @@ else
     echo -n "Installing package dovecot... "
     apt -qq install -y dovecot-imapd dovecot-pop3d > apt-install-dovecot.log 2>&1
     echo -e "\e[1;32mdone\e[0m"
+
+    echo -n "Installing package mailutils... "
+    apt -qq install -y mailutils > apt-install-mailutils.log 2>&1
+    echo -e "\e[1;32mdone\e[0m"
 fi
 
 ############## Configuration ##############
 echo -n "Configuring postfix... "
 postconf -e "myhostname=$HOSTNAME"
-sed '/^smtpd_relay_restrictions/ s/defer_unauth_destination/reject_unauth_destination/' /etc/postfix/main.cf
+postconf -e smtpd_relay_restrictions="permit_mynetworks permit_sasl_authenticated reject_unauth_destination"
 echo -e "\e[1;32mdone\e[0m"
 
 for MAILUSER in "${MAIL_USERS[@]}"; do
