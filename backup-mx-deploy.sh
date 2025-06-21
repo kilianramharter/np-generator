@@ -17,6 +17,7 @@ SERVER_HOSTNAME=ROOT-MX
 ALLOWED_NETWORKS="180.1.10.0/24" # VERY IMPORTANT: Enter networks that should be allowed to send here
 DOMAIN="example.com"
 HOSTNAME="mail.example.com"
+PRIMARY_MX_HOSTNAME="mx.totallysecure.net"
 MAILTYPE="Internet Site"  # Options: No configuration, Internet Site, Internet with smarthost, Satellite system, Local only
 
     
@@ -89,14 +90,14 @@ postconf -e "mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 $ALLOWED_
 echo -e "\e[1;32mdone\e[0m"
 
 echo -n "Setup Backup... "
-postconf -e relay_domains=totallysecure.net
+postconf -e relay_domains=$DOMAIN
 postconf -e smtpd_relay_restrictions="permit_mynetworks permit_sasl_authenticated reject_unauth_destination"
 postconf -e transport_maps=hash:/etc/postfix/transport
 
 cat > /etc/postfix/transport <<EOF
-totallysecure.net smtp:mx.totallysecure.net:25
+$DOMAIN smtp:$PRIMARY_MX_HOSTNAME:25
 EOF
-postconf -e mydestination="$myhostname, MX-BACKUP, localhost.localdomain, localhost"
+postconf -e mydestination="\$myhostname, MX-BACKUP, localhost.localdomain, localhost"
 
 postmap /etc/postfix/transport
 echo -e "\e[1;32mdone\e[0m"
