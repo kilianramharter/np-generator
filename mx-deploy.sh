@@ -14,7 +14,7 @@ IPV6_SERVER_GATEWAY=fd00::254
 SERVER_INTERFACE=ens33
 SERVER_HOSTNAME=ROOT-MX
 
-ALLOWED_NETWORKS="180.1.10.0/24" # VERY IMPORTANT: Enter networks that should be allowed to send here
+ALLOWED_NETWORKS="180.1.10.0/24 [fd00::]/64" # VERY IMPORTANT: Enter networks that should be allowed to send here
 DOMAIN="example.com"
 HOSTNAME="mail.example.com"
 MAILTYPE="Internet Site"  # Options: No configuration, Internet Site, Internet with smarthost, Satellite system, Local only
