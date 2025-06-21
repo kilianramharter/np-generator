@@ -93,14 +93,14 @@ echo -e "\e[1;32mdone\e[0m"
 
 for MAILUSER in "${MAIL_USERS[@]}"; do
     echo -n "Creating users $MAILUSER... "
-    useradd -s /usr/sbin/nologin $MAILUSER
+    useradd -s /usr/sbin/nologin -m $MAILUSER
     echo "$MAILUSER:$DEFAULT_USER_PASS" | chpasswd
     echo -e "\e[1;32mdone\e[0m"
 done
 
 echo -n "Configuring dovecot... "
 sudo sed -i 's/^#\?disable_plaintext_auth\s*=.*/disable_plaintext_auth = no/' /etc/dovecot/conf.d/10-auth.conf
-sudo sed -i 's|^#\?mail_location\s*=.*|mail_location = mbox:INBOX=/var/mail/%u|' /etc/dovecot/conf.d/10-mail.conf
+sudo sed -i 's|^#\?mail_location\s*=.*|mail_location = mbox:~/mail:INBOX=/var/mail/%u|' /etc/dovecot/conf.d/10-mail.conf
 echo -e "\e[1;32mdone\e[0m"
 
 ############### Networking ################
