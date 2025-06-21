@@ -46,7 +46,7 @@ echo -e "============ POSTFIX ==========="
 echo -e "DOMAIN:        \t${DOMAIN}"
 echo -e "HOSTNAME:      \t${HOSTNAME}"
 echo -e "MAILTYPE:      \t${MAILTYPE}"
-echo -en "USERS:        \t$"
+echo -en "USERS:        \t"
 for item in "${MAIL_USERS[@]}"; do
   echo -n "$item, "
 done
