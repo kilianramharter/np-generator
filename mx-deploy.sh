@@ -14,6 +14,7 @@ IPV6_SERVER_GATEWAY=fd00::254
 SERVER_INTERFACE=ens33
 SERVER_HOSTNAME=ROOT-MX
 
+ALLOWED_NETWORKS="180.1.10.0/24" # VERY IMPORTANT: Enter networks that should be allowed to send here
 DOMAIN="example.com"
 HOSTNAME="mail.example.com"
 MAILTYPE="Internet Site"  # Options: No configuration, Internet Site, Internet with smarthost, Satellite system, Local only
@@ -43,13 +44,15 @@ echo -e "IP IFACE:       \t${SERVER_INTERFACE}"
 echo -e "HOSTNAME:       \t${SERVER_HOSTNAME}"
 
 echo -e "============ POSTFIX ==========="
-echo -e "DOMAIN:        \t${DOMAIN}"
-echo -e "HOSTNAME:      \t${HOSTNAME}"
-echo -e "MAILTYPE:      \t${MAILTYPE}"
-echo -en "USERS:        \t"
+echo -e "DOMAIN:         \t${DOMAIN}"
+echo -e "HOSTNAME:       \t${HOSTNAME}"
+echo -e "MAILTYPE:       \t${MAILTYPE}"
+echo -e "ALLOWED NWS:    \t${ALLOWED_NETWORKS}"
+echo -en "USERS:         \t"
 for item in "${MAIL_USERS[@]}"; do
   echo -n "$item, "
 done
+echo -e "DEFAULT PASS:   \t${DEFAULT_USER_PASS}"
 echo ""
 
 echo -en "\n\033[1;31mPRESS ENTER TO CONFIRM...\033[0m"
@@ -93,6 +96,7 @@ fi
 echo -n "Configuring postfix... "
 postconf -e "myhostname=$HOSTNAME"
 postconf -e smtpd_relay_restrictions="permit_mynetworks permit_sasl_authenticated reject_unauth_destination"
+postconf -e "mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 $ALLOWED_NETWORKS"
 echo -e "\e[1;32mdone\e[0m"
 
 for MAILUSER in "${MAIL_USERS[@]}"; do
