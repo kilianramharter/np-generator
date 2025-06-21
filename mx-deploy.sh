@@ -42,7 +42,7 @@ echo -e "IP IFACE:       \t${SERVER_INTERFACE}"
 echo -e "HOSTNAME:       \t${SERVER_HOSTNAME}"
 
 echo -e "============ POSTFIX ==========="
-echo -e "DOMAIN:        \t${SERVER_HOSTNAME}"
+echo -e "DOMAIN:        \t${DOMAIN}"
 echo -e "HOSTNAME:      \t${HOSTNAME}"
 echo -e "MAILTYPE:      \t${MAILTYPE}"
 echo -en "USERS:        \t$"

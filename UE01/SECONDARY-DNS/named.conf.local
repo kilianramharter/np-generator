@@ -12,13 +12,13 @@ zone "totallysecure.net" {
 
 zone "net" {
         type slave;
-        masters { 180.1.10.2; fd00::2; };
+        masters { 180.1.10.3; fd00::2; };
         file "/var/cache/bind/db.net.zone";
 };
 
 zone "medientechnik.org" {
         type slave;
-        masters { 180.1.10.2; fd00::2; };
+        masters { 180.1.10.3; fd00::2; };
         file "/var/cache/bind/db.medientechnik.org.zone";
 };
 
