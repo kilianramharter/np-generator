@@ -124,6 +124,8 @@ echo -e "\e[1;32mdone\e[0m"
 # wordpress = Installs WP + autoconfiguration (wget + WP-CLI)
 # basic = Creates index.html (that contains website name e.g.)
 
+rm -f /etc/apache2/sites-available/*
+
 for VHOST in "${VHOSTS[@]}"; do
     read -r DOMAIN TYPE MODE <<< "$VHOST"
     echo -n "Creating vhost $DOMAIN ($MODE-install)... "
@@ -133,8 +135,6 @@ for VHOST in "${VHOSTS[@]}"; do
 
     mkdir -p $WEBDIR
     chown -R www-data:www-data "$WEBDIR"
-
-    rm -f /etc/apache2/sites-available/*
 
     if [[ "$TYPE" == "http" || "$TYPE" == "both" ]]; then
         cat > /etc/apache2/sites-available/$DOMAIN.http.conf <<EOF
