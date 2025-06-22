@@ -1,17 +1,5 @@
 #!/bin/bash
 
-# install apache2
-# php latest
-# mariadb
-# certbot
-
-# wordpress autoinstall (WP-CLI)
-
-
-# connect apache2 with php
-# create vhosts (in a loop)
-    # type empty / php / wordpress
-
 # Preparation - Set IP before running:
 IPV4_SERVER_IP=180.1.10.1
 IPV4_SERVER_SUBNETMASK=24
@@ -99,7 +87,7 @@ else
     echo -n "Installing package php... "
     # apt -qq install -y php php-cli php-common php-imap php-fpm php-snmp php-xml php-zip php-mbstring php-curl php-mysqli php-gd php-intl > apt-install-php.log 2>&1
     # apt -qq install -y php libapache2-mod-php php-mysql php-curl php-gd php-json php-intl php-bcmath php-opcache php-apcu php-mbstring php-fileinfo php-xml php-soap php-tokenizer php-zip
-    apt -qq install -y php libapache2-mod-php php-mysql php-mysqli php-cli php-common php-curl php-fpm php-gd php-json php-intl php-imap php-bcmath php-opcache php-apcu php-mbstring php-fileinfo php-xml php-snmp php-soap php-tokenizer php-zip > apt-install-php.log 2>&1
+    apt -qq install -y php libapache2-mod-php php-mysql php-cli php-common php-curl php-fpm php-gd php-json php-intl php-imap php-bcmath php-opcache php-apcu php-mbstring php-fileinfo php-xml php-snmp php-soap php-tokenizer php-zip > apt-install-php.log 2>&1
     echo -e "\e[1;32mdone\e[0m"
 
     echo -n "Installing package mariadb... "
@@ -120,6 +108,7 @@ fi
 echo -n "Configuring apache2... "
 a2enmod php$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 a2enmod rewrite
+systemctl enable apache2
 # Enable mod_rewrite for URL rewriting.
 echo -e "\e[1;32mdone\e[0m"
 
@@ -132,9 +121,9 @@ sed -i 's/^max_execution_time = .*/max_execution_time = 300/' "$PHP_INI"
 sed -i 's/^max_input_time = .*/max_input_time = 300/' "$PHP_INI"
 echo -e "\e[1;32mdone\e[0m"
 
-echo -n "Configuring mariadb... "
+# echo -n "Configuring mariadb... "
 # run hardening script
-echo -e "\e[1;32mdone\e[0m"
+# echo -e "\e[1;32mdone\e[0m"
 
 ############## VirtualHosts ###############
 # wordpress = Installs WP + autoconfiguration (wget + WP-CLI)
@@ -158,12 +147,47 @@ for VHOST in "${VHOSTS[@]}"; do
 
     rm -f /etc/apache2/sites-available/*
 
-    if [[ "$TYPE" == "http" ]]; then
-        # asd
-    elif [[ "$TYPE" == "https" ||  ]]; then
-        # asd
-    elif [[ "$TYPE" == "both" ]]; then
-        # asd
+    if [[ "$TYPE" == "http" || "$TYPE" == "both" ]]; then
+        cat > /etc/apache2/sites-available/$DOMAIN.http.conf <<EOF
+<VirtualHost *:80>
+    ServerName $DOMAIN
+    DocumentRoot $WEBDIR
+    <Directory $WEBDIR>
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    ErrorLog \${APACHE_LOG_DIR}/$DOMAIN-error.log
+    CustomLog \${APACHE_LOG_DIR}/$DOMAIN-access.log combined
+</VirtualHost>
+EOF
+      a2ensite "$DOMAIN.http.conf"
+    fi
+
+    if [[ "$TYPE" == "https" || "$TYPE" == "both" ]]; then
+      cat > /etc/apache2/sites-available/$DOMAIN.https.conf <<EOF
+<VirtualHost *:443>
+    ServerName $DOMAIN
+    DocumentRoot $WEBDIR
+    <Directory $WEBDIR>
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    ErrorLog \${APACHE_LOG_DIR}/$DOMAIN-error.log
+    CustomLog \${APACHE_LOG_DIR}/$DOMAIN-access.log combined
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+    <FilesMatch ".(?:cgi|shtml|phtml|php)$">
+      SSLOptions +StdEnvVars 
+    </FilesMatch>
+    <Directory /usr/lib/cgi-bin>
+      SSLOptions +StdEnvVars
+    </Directory>
+</VirtualHost>
+EOF
+      a2ensite "$DOMAIN.https.conf"
     fi
 
     if [[ "$MODE" == "wordpress" ]]; then
@@ -185,6 +209,7 @@ for VHOST in "${VHOSTS[@]}"; do
         cd $PREVPATH
     elif [[ "$MODE" == "basic" ]]; then
         # Add Basic settings
+        echo "<html><head><title>$DOMAIN</title></head><body><h1>Welcome to $DOMAIN</h1></body></html>" > "$WEBDIR/index.html"
     fi
 
     echo -e "\e[1;32mdone\e[0m"
