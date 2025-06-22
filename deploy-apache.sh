@@ -90,20 +90,21 @@ else
     echo -e "\e[1;32mdone\e[0m"
 
     echo -n "Installing acme.sh... "
-    wget -O -  https://get.acme.sh/ | sh -s email=my@example.com
+    wget -O -  https://get.acme.sh/ | sh -s email=my@example.com > /dev/null
     echo -e "\e[1;32mdone\e[0m"
 
     echo -n "Installing wp-cli... "
-    wget -O /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    wget -O /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar > /dev/null
     chmod +x /usr/local/bin/wp
     echo -e "\e[1;32mdone\e[0m"
 fi
 
 ############## Configuration ##############
 echo -n "Configuring apache2... "
-a2enmod php$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-a2enmod rewrite
-systemctl enable apache2
+a2enmod php$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;') > /dev/null
+a2enmod rewrite > /dev/null
+a2enmod ssl > /dev/null
+systemctl enable apache2 > dev/null
 # Enable mod_rewrite for URL rewriting.
 echo -e "\e[1;32mdone\e[0m"
 
@@ -150,7 +151,7 @@ for VHOST in "${VHOSTS[@]}"; do
     CustomLog \${APACHE_LOG_DIR}/$DOMAIN-access.log combined
 </VirtualHost>
 EOF
-      a2ensite "$DOMAIN.http.conf"
+      a2ensite "$DOMAIN.http.conf" > /dev/null
     fi
 
     if [[ "$TYPE" == "https" || "$TYPE" == "both" ]]; then
@@ -176,7 +177,7 @@ EOF
     </Directory>
 </VirtualHost>
 EOF
-      a2ensite "$DOMAIN.https.conf"
+      a2ensite "$DOMAIN.https.conf" > /dev/null
     fi
 
     if [[ "$MODE" == "wordpress" ]]; then
@@ -190,11 +191,11 @@ EOF
         mysql -u root -e "FLUSH PRIVILEGES;"
 
         cd $WEBDIR
-        wp core download --allow-root
-        wp config create --dbname="$WP_TITLE" --dbuser="$WP_TITLE" --dbpass="$WP_TITLE" --dbhost=localhost --dbprefix="wp_" --skip-check --allow-root
-        wp core install --url="http://$DOMAIN" --title="$WP_TITLE" --admin_user="$WP_ADMIN_USER" --admin_password="$WP_ADMIN_PASS" --admin_email="$WP_ADMIN_EMAIL" --skip-email --allow-root
-        wp option update timezone_string "Europe/Vienna" --allow-root
-        wp theme install astra --activate --allow-root
+        wp core download --allow-root > /dev/null
+        wp config create --dbname="$WP_TITLE" --dbuser="$WP_TITLE" --dbpass="$WP_TITLE" --dbhost=localhost --dbprefix="wp_" --skip-check --allow-root > /dev/null
+        wp core install --url="http://$DOMAIN" --title="$WP_TITLE" --admin_user="$WP_ADMIN_USER" --admin_password="$WP_ADMIN_PASS" --admin_email="$WP_ADMIN_EMAIL" --skip-email --allow-root > /dev/null
+        wp option update timezone_string "Europe/Vienna" --allow-root > /dev/null
+        wp theme install astra --activate --allow-root > /dev/null
         cd $PREVPATH
     elif [[ "$MODE" == "basic" ]]; then
         # Add Basic settings
