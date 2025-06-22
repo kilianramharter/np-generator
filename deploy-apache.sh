@@ -32,6 +32,10 @@ HOSTNAME="mail.example.com"
 MAILTYPE="Internet Site"  # Options: No configuration, Internet Site, Internet with smarthost, Satellite system, Local only
 MAIL_USERS=("user1")
 DEFAULT_USER_PASS="student"
+
+WP_ADMIN_USER="admin"
+WP_ADMIN_PASS="admin"
+WP_ADMIN_EMAIL="admin@example.com"
     
 ###########################################
 # Script for Ubuntu Postfix Preparation #
@@ -105,11 +109,17 @@ else
     echo -n "Installing acme.sh... "
     wget -O -  https://get.acme.sh/ | sh -s email=my@example.com
     echo -e "\e[1;32mdone\e[0m"
+
+    echo -n "Installing wp-cli... "
+    wget -O /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    chmod +x /usr/local/bin/wp
+    echo -e "\e[1;32mdone\e[0m"
 fi
 
 ############## Configuration ##############
 echo -n "Configuring apache2... "
 a2enmod php$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+a2enmod rewrite
 # Enable mod_rewrite for URL rewriting.
 echo -e "\e[1;32mdone\e[0m"
 
@@ -128,13 +138,57 @@ echo -e "\e[1;32mdone\e[0m"
 
 ############## VirtualHosts ###############
 # wordpress = Installs WP + autoconfiguration (wget + WP-CLI)
-# empty = Creates index.html (that contains website name e.g.)
-# protected = creates password-protected
+# basic = Creates index.html (that contains website name e.g.)
 
-vhosts=(
-    "medientechnik.org http,https" -> /var/www/medientechnik.org
-    "" -> /var/www/medientechnik.org/protected
+VHOSTS=(
+#   "yourdomain.com http|https|both wordpress|basic"
+    "medientechnik.org both wordpress"
+    "totallysecure.net http basic"
 )
+
+for VHOST in "${VHOSTS[@]}"; do
+    read -r DOMAIN TYPE MODE <<< "$VHOST"
+    echo -n "Creating vhost $DOMAIN ($MODE-install)... "
+
+    WEBDIR="/var/www/$DOMAIN"
+    PREVPATH=$(pwd)
+
+    mkdir -p $WEBDIR
+    chown -R www-data:www-data "$WEBDIR"
+
+    rm -f /etc/apache2/sites-available/*
+
+    if [[ "$TYPE" == "http" ]]; then
+        # asd
+    elif [[ "$TYPE" == "https" ||  ]]; then
+        # asd
+    elif [[ "$TYPE" == "both" ]]; then
+        # asd
+    fi
+
+    if [[ "$MODE" == "wordpress" ]]; then
+        # Install WordPress
+        WP_TITLE="$(echo $DOMAIN | tr -d '.')"
+
+        # mysql -u root -p"$DB_ROOT_PASS" -e "CREATE DATABASE $WP_TITLE DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+        mysql -u root -e "CREATE DATABASE $WP_TITLE DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+        mysql -u root -e "CREATE USER '$WP_TITLE'@'localhost' IDENTIFIED BY '$WP_TITLE';"
+        mysql -u root -e "GRANT ALL PRIVILEGES ON $WP_TITLE.* TO '$WP_TITLE'@'localhost';"
+        mysql -u root -e "FLUSH PRIVILEGES;"
+
+        cd $WEBDIR
+        wp core download --allow-root
+        wp config create --dbname="$WP_TITLE" --dbuser="$WP_TITLE" --dbpass="$WP_TITLE" --dbhost=localhost --dbprefix="wp_" --skip-check --allow-root
+        wp core install --url="http://$DOMAIN" --title="$WP_TITLE" --admin_user="$WP_ADMIN_USER" --admin_password="$WP_ADMIN_PASS" --admin_email="$WP_ADMIN_EMAIL" --skip-email --allow-root
+        wp option update timezone_string "Europe/Vienna" --allow-root
+        wp theme install astra --activate --allow-root
+        cd $PREVPATH
+    elif [[ "$MODE" == "basic" ]]; then
+        # Add Basic settings
+    fi
+
+    echo -e "\e[1;32mdone\e[0m"
+done
 
 
 ############### Networking ################
