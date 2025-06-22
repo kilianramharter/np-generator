@@ -14,12 +14,11 @@ IPV6_SERVER_GATEWAY=fd00::254
 SERVER_INTERFACE=ens33
 SERVER_HOSTNAME=ROOT-MX
 
-ALLOWED_NETWORKS="180.1.10.0/24 [fd00::]/64" # VERY IMPORTANT: Enter networks that should be allowed to send here
-DOMAIN="example.com"
-HOSTNAME="mail.example.com"
-MAILTYPE="Internet Site"  # Options: No configuration, Internet Site, Internet with smarthost, Satellite system, Local only
-MAIL_USERS=("user1")
-DEFAULT_USER_PASS="student"
+VHOSTS=(
+#   "yourdomain.com http|https|both wordpress|basic"
+    "medientechnik.org both wordpress"
+    "totallysecure.net http basic"
+)
 
 WP_ADMIN_USER="admin"
 WP_ADMIN_PASS="admin"
@@ -47,20 +46,16 @@ echo -e "IPv6 NAMESERVER:\t${IPV6_SERVER_NAMESERVER}"
 echo -e "IP IFACE:       \t${SERVER_INTERFACE}"
 echo -e "HOSTNAME:       \t${SERVER_HOSTNAME}"
 
-echo -e "============ POSTFIX ==========="
-echo -e "DOMAIN:         \t${DOMAIN}"
-echo -e "HOSTNAME:       \t${HOSTNAME}"
-echo -e "MAILTYPE:       \t${MAILTYPE}"
-echo -e "ALLOWED NWS:    \t${ALLOWED_NETWORKS}"
-echo -en "USERS:         \t"
-for item in "${MAIL_USERS[@]}"; do
-  echo -n "$item, "
+echo -e "\n============ APACHE2 ==========="
+echo -en "VHOSTS:        \t"
+for vhost in "${VHOSTS[@]}"; do
+  echo -n "$vhost, "
 done
-echo -e "DEFAULT PASS:   \t${DEFAULT_USER_PASS}"
-echo ""
+echo "\n"
 
 echo -en "\n\033[1;31mPRESS ENTER TO CONFIRM...\033[0m"
 read
+echo ""
 
 ################# Hostname #################
 echo -n "Setting hostname... "
@@ -128,12 +123,6 @@ echo -e "\e[1;32mdone\e[0m"
 ############## VirtualHosts ###############
 # wordpress = Installs WP + autoconfiguration (wget + WP-CLI)
 # basic = Creates index.html (that contains website name e.g.)
-
-VHOSTS=(
-#   "yourdomain.com http|https|both wordpress|basic"
-    "medientechnik.org both wordpress"
-    "totallysecure.net http basic"
-)
 
 for VHOST in "${VHOSTS[@]}"; do
     read -r DOMAIN TYPE MODE <<< "$VHOST"
