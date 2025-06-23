@@ -104,6 +104,7 @@ echo -n "Configuring apache2... "
 a2enmod php$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;') > /dev/null
 a2enmod rewrite > /dev/null
 a2enmod ssl > /dev/null
+a2enmod auth_digest > /dev/null
 systemctl enable apache2 > /dev/null 2>&1
 echo -e "\e[1;32mdone\e[0m"
 
@@ -198,7 +199,7 @@ EOF
         cd $PREVPATH
     elif [[ "$MODE" == "basic" ]]; then
         # Add Basic settings
-        echo "<html><head><title>$DOMAIN</title></head><body><h1>Welcome to $DOMAIN</h1></body></html>" > "$WEBDIR/index.html"
+        echo "<html><head><title>$DOMAIN</title><style>body {text-align: center; font-family: sans-serif;}</style></head><body><h1>Welcome to $DOMAIN</h1><p>You can edit this file at <strong>$WEBDIR/index.html</strong></p></body></html>" > "$WEBDIR/index.html"
     fi
 
     echo -e "\e[1;32mdone\e[0m"
