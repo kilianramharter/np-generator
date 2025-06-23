@@ -102,7 +102,6 @@ EOF
         fi
         echo "};" >> "$NAMED_CONF_LOCAL"
 
-EOF
     else
         cat >> "$NAMED_CONF_LOCAL" <<EOF
 zone "${ZONE}" {
