@@ -1,0 +1,12 @@
+# Assignment 1 - DNS
+
+
+# Assignment 2 - DNSSEC
+
+
+# Assignment 3 - MAIL
+- Sanity check for the mail config
+
+# Assignment 4 - WEB
+- We should use 3 different hostnames and 2 virtual hosts? Should the 3rd domain be a 3rd level domain CNAME
+- Self signed certificate? Is the default snakeoil cert enough or do we have to generate a new one?
