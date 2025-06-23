@@ -1,0 +1,26 @@
+{
+  "zones": [
+    {
+      "zone": "example.com",
+      "remote_role": "master",
+      "masters_ip": "",
+      "transfer_ip": "192.0.2.50",
+      "allow_recursion": "yes",
+      "dnssec_validation": "auto",
+      "nameserver_ip": "192.0.2.10",
+      "email": "admin@example.com",
+      "notify": "yes"
+    },
+    {
+      "zone": "example.org",
+      "remote_role": "slave",
+      "masters_ip": "192.0.2.100",
+      "transfer_ip": "",
+      "allow_recursion": "no",
+      "dnssec_validation": "no",
+      "nameserver_ip": "192.0.2.11",
+      "email": "admin@example.org",
+      "notify": "no"
+    }
+  ]
+}
