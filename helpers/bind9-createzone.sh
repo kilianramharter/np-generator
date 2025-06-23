@@ -17,9 +17,8 @@ ask_input() {
     read -p "What is the Domain Role (MASTER/SLAVE/NONE): " REMOTE_ROLE
     if [[ "$REMOTE_ROLE" == "SLAVE" ]]; then
         read -p "Master IP for zone transfers: " MASTERS_IP
-        elif [[ "$REMOTE_ROLE" == "MASTER" ]]; then
-            read -p "Allow Transfer from IP for this zone: " TRANSFER_IP
-        fi
+    elif [[ "$REMOTE_ROLE" == "MASTER" ]]; then
+        read -p "Allow Transfer from IP for this zone: " TRANSFER_IP
     fi
     read -p "Allow recursion? (yes/no): " ALLOW_RECURSION
     read -p "DNSSEC VALIDATION? (yes/no/auto): " DNSSEC_VALIDATION
