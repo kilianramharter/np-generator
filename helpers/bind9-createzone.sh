@@ -9,6 +9,9 @@ ALLOW_RECURSION="yes" # yes or no
 MASTERS_IP=""
 TRANSFER_IP=""
 DNSSEC_VALIDATION="no" # yes or no or auto
+NAMESERVER_IP=""
+EMAIL="admin@${ZONE}" # Default email for SOA record
+NOTIFY="yes" # Default notify setting
 
 # Function to ask for input if not provided
  
@@ -22,6 +25,9 @@ ask_input() {
     fi
     read -p "Allow recursion? (yes/no): " ALLOW_RECURSION
     read -p "DNSSEC VALIDATION? (yes/no/auto): " DNSSEC_VALIDATION
+    read -p "What is the IP of the nameserver?: " NAMESERVER_IP
+    read -p "What is the postmaster mail?: " EMAIL
+    read -p "Notify on changes? (yes/no): " NOTIFY
 }
 
 # # Function to parse JSON input file
@@ -41,7 +47,8 @@ options {
   recursion ${ALLOW_RECURSION};
   allow-query { any; };
   empty-zones-enable no;
-}
+  notify ${NOTIFY};
+};
 EOF
 }
 # Function to create zone file
@@ -52,7 +59,7 @@ create_zone_file() {
     if [[ "$REMOTE_ROLE" != "SLAVE" ]]; then
         cat > "$ZONE_FILE" <<EOF
 \$TTL    86400
-@       IN      SOA     ns1.${ZONE}. admin.${ZONE}. (
+@       IN      SOA     ns1.${ZONE}. ${EMAIL}. (
                         2025062301 ; Serial
                         3600       ; Refresh
                         1800       ; Retry
@@ -60,6 +67,7 @@ create_zone_file() {
                         86400 )    ; Minimum TTL
 
         IN      NS      ns1.${ZONE}.
+ns1     IN      A       ${NAMESERVER_IP}
 ; Example records:
 ; ns1     IN      A       180.1.10.2
 ; www     IN      A       192.0.2.1
@@ -88,7 +96,12 @@ zone "${ZONE}" {
     type master;
     file "${ZONES_DIR}/db.${ZONE}.zone";
     allow-transfer { ${TRANSFER_IP}; };
-};
+EOF
+        if [[ "$NOTIFY" == "yes" ]]; then
+            echo "  also-notify { ${TRANSFER_IP}; };" >> "$NAMED_CONF_LOCAL"
+        fi
+        echo "};" >> "$NAMED_CONF_LOCAL"
+
 EOF
     else
         cat >> "$NAMED_CONF_LOCAL" <<EOF
