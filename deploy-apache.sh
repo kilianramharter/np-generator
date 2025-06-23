@@ -47,11 +47,11 @@ echo -e "IP IFACE:       \t${SERVER_INTERFACE}"
 echo -e "HOSTNAME:       \t${SERVER_HOSTNAME}"
 
 echo -e "\n============ APACHE2 ==========="
-echo -en "VHOSTS:        \t"
+echo -en "VHOSTS:         \t"
 for vhost in "${VHOSTS[@]}"; do
   echo -n "$vhost, "
 done
-echo "\n"
+echo -e "\n"
 
 echo -en "\n\033[1;31mPRESS ENTER TO CONFIRM...\033[0m"
 read
