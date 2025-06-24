@@ -178,6 +178,56 @@ EOF
 </VirtualHost>
 EOF
       a2ensite "$DOMAIN.https.conf" > /dev/null
+
+      # Configuration parameters - customize these values
+      COMMON_NAME="$DOMAIN"         # Domain name or IP
+      EMAIL="admin@$DOMAIN"         # Admin email
+      DAYS_VALID=365                # Certificate validity in days
+      KEY_LENGTH=4096               # RSA key length (2048 or 4096)
+
+      # File locations - standard Debian/Ubuntu Apache paths
+      CERT_FILE="/etc/ssl/certs/ssl-cert-$DOMAIN.pem"
+      KEY_FILE="/etc/ssl/private/ssl-cert-$DOMAIN.key"
+
+      # Create temporary directory
+      TEMP_DIR=$(mktemp -d)
+      trap 'rm -rf "$TEMP_DIR"' EXIT
+
+      echo "Generating self-signed certificate with the following parameters:"
+      echo "Common Name: $COMMON_NAME"
+      echo "Email: $EMAIL"
+      echo "Validity: $DAYS_VALID days"
+      echo "Key Length: $KEY_LENGTH bits"
+
+      # Generate private key and certificate
+      openssl req -x509 -nodes -days "$DAYS_VALID" -newkey "rsa:$KEY_LENGTH" \
+          -keyout "$TEMP_DIR/temp.key" -out "$TEMP_DIR/temp.pem" \
+          -subj "/C=AT/ST=Lower Austria/L=St. Poelten/O=FH St. Poelten/OU=itsec/CN=$COMMON_NAME/emailAddress=$EMAIL"
+
+      # Verify the files were created
+      if [ ! -f "$TEMP_DIR/temp.key" ] || [ ! -f "$TEMP_DIR/temp.pem" ]; then
+          echo "ERROR: Failed to generate certificate files." >&2
+          exit 1
+      fi
+
+      # Create target directories if they don't exist
+      mkdir -p "$(dirname "$CERT_FILE")"
+      mkdir -p "$(dirname "$KEY_FILE")"
+
+      # Move files to their final locations (with force overwrite)
+      echo "Installing certificate files..."
+      mv -f "$TEMP_DIR/temp.pem" "$CERT_FILE"
+      mv -f "$TEMP_DIR/temp.key" "$KEY_FILE"
+
+      # Set proper permissions
+      chmod 644 "$CERT_FILE"
+      chmod 640 "$KEY_FILE"
+      chown root:ssl-cert "$KEY_FILE"
+
+      echo "Successfully created and installed:"
+      echo "Certificate: $CERT_FILE, Private Key: $KEY_FILE"
+    else
+      echo "No SSL configuration for $DOMAIN, skipping..."
     fi
 
     if [[ "$MODE" == "wordpress" ]]; then
