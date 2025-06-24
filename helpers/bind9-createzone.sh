@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ZONES_DIR="/etc/bind/zones"
+CACHE_DIR="/var/cache/bind"
 NAMED_CONF_LOCAL="/etc/bind/named.conf.local"
 NAMED_CONF_OPTIONS="/etc/bind/named.conf.options"
 ZONE="medientechnik.org"
@@ -16,8 +17,8 @@ NOTIFY="yes" # Default notify setting
 # Function to ask for input if not provided
  
 ask_input() {
-    read -p "Zone name (e.g., example.com): " ZONE
-    read -p "What is the Domain Role (MASTER/SLAVE/NONE): " REMOTE_ROLE
+    read -p "Zone name (e.g., example.com or root or none: " ZONE
+    read -p "What is the Domain Role (master/slave/none): " REMOTE_ROLE
     if [[ "$REMOTE_ROLE" == "SLAVE" ]]; then
         read -p "Master IP for zone transfers: " MASTERS_IP
     elif [[ "$REMOTE_ROLE" == "MASTER" ]]; then
@@ -67,9 +68,9 @@ create_zone_file() {
                         86400 )    ; Minimum TTL
 
         IN      NS      ns1.${ZONE}.
-ns1     IN      A       ${NAMESERVER_IP}
+ns1.${ZONE}     IN      A       ${NAMESERVER_IP}
 ; Example records:
-; ns1     IN      A       180.1.10.2
+; ns1.${ZONE}     IN      A       180.1.10.2
 ; www     IN      A       192.0.2.1
 ; ipv6    IN      AAAA    2001:db8::1
 ; alias   IN      CNAME   www.${ZONE}.
@@ -79,7 +80,7 @@ EOF
 }
 
 # Function to update named.conf.local
-update_named_conf_local() {
+old_update_named_conf_local() {
     if [[ "$REMOTE_ROLE" == "SLAVE" ]]; then
         cat >> "$NAMED_CONF_LOCAL" <<EOF
 
@@ -113,6 +114,25 @@ EOF
     echo "Updated $NAMED_CONF_LOCAL"
 }
 
+update_named_conf_local(){
+    echo "" >> "$NAMED_CONF_LOCAL"
+    if [[ "$ZONE" == "ROOT" ]]; then
+        echo "zone \".\" {" >> "$NAMED_CONF_LOCAL"
+    else
+        echo "zone \"${ZONE}.\" {" >> "$NAMED_CONF_LOCAL"
+    fi
+    echo "    type ${REMOTE_ROLE,,};" >> "$NAMED_CONF_LOCAL"
+    if [[ "$REMOTE_ROLE" == "master" || "$REMOTE_ROLE" == "none" ]]; then
+        echo "    masters { ${MASTERS_IP}; };" >> "$NAMED_CONF_LOCAL"
+        if [[ "$REMOTE_ROLE" == "master" ]]; then
+            echo "    allow-transfer { ${TRANSFER_IP}; };" >> "$NAMED_CONF_LOCAL"
+        fi
+    elif [[ "$REMOTE_ROLE" == "slave" ]]; then
+        echo '    file "'${CACHE_DIR}'/db.'${ZONE}'.zone";' >> "$NAMED_CONF_LOCAL"
+        echo "    masters { ${MASTERS}; };" >> "$NAMED_CONF_LOCAL"
+    fi
+    echo "    };" >> "$NAMED_CONF_LOCAL"      
+}
 # Main
 if [[ "$1" == *.json && -f "$1" ]]; then
     parse_json "$1"
@@ -125,6 +145,8 @@ else
     ask_input
 fi
 
-create_zone_file
-update_named_conf_local
+if [[ "$ZONE" != "NONE"  ]]; then
+    create_zone_file
+    update_named_conf_local
+fi
 update_named_conf_options
