@@ -1,0 +1,18 @@
+# ASSIGNMENT 1
+
+
+# ASSIGNMENT 2
+
+
+# ASSIGNMENT 3
+
+
+# ASSIGNMENT 4
+[ ] Self signed certificate generator
+
+# ASSIGNMENT 5
+[ ] rsyslog auto-deployment script
+[ ] nginx reverse proxy auto-deployment script
+
+# GENERAL
+[ ] Network deployment script
