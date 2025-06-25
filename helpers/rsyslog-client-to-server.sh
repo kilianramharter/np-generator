@@ -18,11 +18,11 @@ RSYSLOG_LOG_LEVEL="$3"
 RSYSLOG_CONFIG_FILE="/etc/rsyslog.d/90-remote.conf"
 
 # Set a single "@" for UDP or "@@" for TCP
-if [ "$RSYSLOG_UDP_TCP" == "udp" ]; then
+if [[ "$RSYSLOG_UDP_TCP" == "tcp" ]]; then
     RSYSLOG_SERVER_IP="@${RSYSLOG_SERVER_IP}"
-else
+elif [[ "$RSYSLOG_UDP_TCP" == "udp" ]]; then
     RSYSLOG_SERVER_IP="@@${RSYSLOG_SERVER_IP}"
-else 
+else
     echo -e "\033[1;31mInvalid protocol. Use 'udp' or 'tcp'.\033[0m"
     exit 1
 fi
@@ -38,7 +38,7 @@ case "$RSYSLOG_LOG_LEVEL" in
 esac
 
 echo -n "Configuring syslog... "
-cat > $RSYSLOG_CONFIG_FILE <<EOF
+cat >> $RSYSLOG_CONFIG_FILE <<EOF
 *.$RSYSLOG_LOG_LEVEL $RSYSLOG_SERVER_IP
 EOF
 echo -e "\e[1;32mdone\e[0m"
