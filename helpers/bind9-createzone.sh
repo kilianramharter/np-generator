@@ -40,18 +40,7 @@ ask_input() {
 # }
 
 # Function to update named.conf.options
-update_named_conf_options() {
-cat > "$NAMED_CONF_OPTIONS" <<EOF
-options {
-  directory "/var/cache/bind";
-  dnssec-validation ${DNSSEC_VALIDATION};
-  recursion ${ALLOW_RECURSION};
-  allow-query { any; };
-  empty-zones-enable no;
-  notify ${NOTIFY};
-};
-EOF
-}
+
 # Function to create zone file
 create_zone_file() {
     ZONE_FILE="$ZONES_DIR/db.${ZONE}.zone"
@@ -121,7 +110,7 @@ update_named_conf_local(){
     else
         echo "zone \"${ZONE}.\" {" >> "$NAMED_CONF_LOCAL"
     fi
-    echo "    type ${REMOTE_ROLE,,};" >> "$NAMED_CONF_LOCAL"
+    echo "    type ${REMOTE_ROLE};" >> "$NAMED_CONF_LOCAL"
     if [[ "$REMOTE_ROLE" == "master" || "$REMOTE_ROLE" == "none" ]]; then
         echo "    masters { ${MASTERS_IP}; };" >> "$NAMED_CONF_LOCAL"
         if [[ "$REMOTE_ROLE" == "master" ]]; then
