@@ -26,7 +26,7 @@ ask_input() {
     fi
     read -p "Allow recursion? (yes/no): " ALLOW_RECURSION
     read -p "DNSSEC VALIDATION? (yes/no/auto): " DNSSEC_VALIDATION
-    read -p "What is the IP of the nameserver?: " NAMESERVER_IP
+    read -p "What is the IP of the nameserver for $ZONE?: " NAMESERVER_IP
     read -p "What is the postmaster mail?: " EMAIL
     read -p "Notify on changes? (yes/no): " NOTIFY
 }
@@ -116,7 +116,7 @@ EOF
 
 update_named_conf_local(){
     echo "" >> "$NAMED_CONF_LOCAL"
-    if [[ "$ZONE" == "ROOT" ]]; then
+    if [[ "$ZONE" == "root" ]]; then
         echo "zone \".\" {" >> "$NAMED_CONF_LOCAL"
     else
         echo "zone \"${ZONE}.\" {" >> "$NAMED_CONF_LOCAL"
@@ -145,7 +145,7 @@ else
     ask_input
 fi
 
-if [[ "$ZONE" != "NONE"  ]]; then
+if [[ "$ZONE" != "none"  ]]; then
     create_zone_file
     update_named_conf_local
 fi
