@@ -38,26 +38,6 @@ fi
 
 echo -n "Generating netplan config for $SERVER_INTERFACE... "
 
-# cat > /etc/netplan/50-cloud-init.yaml <<EOF
-# network:
-#   version: 2
-#   renderer: networkd
-#   ethernets:
-#     $SERVER_INTERFACE:
-#       addresses:
-#         - $IPV4_CIDR_ADDRESS
-#         - $IPV6_CIDR_ADDRESS
-#       routes:
-#         - to: default
-#           via: $IPV4_GATEWAY
-#         - to: default
-#           via: $IPV6_GATEWAY
-#       nameservers:
-#           addresses:
-#             - $IPV4_NAMESERVER
-#             - $IPV6_NAMESERVER
-# EOF
-
 # Build the YAML file
 cat > "$NETPLAN_FILE" <<EOF
 network:
@@ -70,7 +50,9 @@ network:
 EOF
 
 if [ -n "$IPV6_CIDR_ADDRESS" ]; then
-    echo "        - $IPV6_CIDR_ADDRESS" >> "$NETPLAN_FILE"
+    cat >> $NETPLAN_FILE <<EOF 
+        - $IPV6_CIDR_ADDRESS
+EOF
 fi
 
 cat >> "$NETPLAN_FILE" <<EOF
@@ -93,7 +75,9 @@ cat >> "$NETPLAN_FILE" <<EOF
 EOF
 
 if [ -n "$IPV6_NAMESERVER" ]; then
-    echo "          - $IPV6_NAMESERVER" >> "$NETPLAN_FILE"
+    cat >> "$NETPLAN_FILE" <<EOF
+          - $IPV6_NAMESERVER
+EOF
 fi
 
 echo -e "\e[1;32mdone\e[0m"
