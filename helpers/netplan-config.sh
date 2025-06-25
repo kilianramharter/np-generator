@@ -98,6 +98,27 @@ fi
 
 echo -e "\e[1;32mdone\e[0m"
 
+
+
+echo -n "Setting config permissions... "
+chown root:root "$NETPLAN_FILE"
+chmod 600 "$NETPLAN_FILE"
+echo -e "\e[1;32mdone\e[0m"
+
+
+
+echo -n "Validating configuration... "
+if netplan generate 2>/dev/null; then
+    echo -e "\e[1;32mvalid\e[0m"
+else
+    echo -e "\e[1;31mfailed\e[0m"
+    echo -e "\e[1;31mError:\033[0m Invalid netplan configuration. Not applying."
+    rm "$NETPLAN_FILE"
+    exit 1
+fi
+
+
+
 echo -n "Applying new configuration... "
 netplan apply
 echo -e "\e[1;32mdone\e[0m"
