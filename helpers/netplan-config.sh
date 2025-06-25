@@ -65,14 +65,14 @@ if [ $# -eq 0 ]; then
     echo -e "#### DHCP configuration ####"
     echo -e "Usage: $0 {INTERFACE-NAME}\n"
     echo -e "#### Static IP configuration ####"
-    echo -e "Usage: $0 {INTERFACE-NAME} {IPV4-CIDR-ADDRESS} {IPV4-GATEWAY} {IPV4-NAMESERVER} [IPV6-CIDR-ADDRESS] [IPV6-GATEWAY] [IPV6-NAMESERVER]"
+    echo -e "Usage: $0 {INTERFACE-NAME} {IPV4-CIDR-ADDRESS} {IPV4-GATEWAY} {IPV4-NAMESERVER} [IPV6-CIDR-ADDRESS] [IPV6-GATEWAY] [IPV6-NAMESERVER]\n"
     exit 1
 elif [ $# -eq 1 ]; then
     DHCP_ENABLED=true
 elif [ $# -lt 4 ]; then
     # ./netplan-config.sh ens33 180.1.10.1/24 180.1.10.254 180.1.10.5 fd00::0/64 fd00::1 fd00::5
     echo -e "\033[1;31mMissing arguments.\033[0m"
-    echo -e "\033[1;31mUsage: $0 {INTERFACE-NAME} {IPV4-CIDR-ADDRESS} {IPV4-GATEWAY} {IPV4-NAMESERVER} [IPV6-CIDR-ADDRESS] [IPV6-GATEWAY] [IPV6-NAMESERVER]\033[0m"
+    echo -e "Usage: $0 {INTERFACE-NAME} {IPV4-CIDR-ADDRESS} {IPV4-GATEWAY} {IPV4-NAMESERVER} [IPV6-CIDR-ADDRESS] [IPV6-GATEWAY] [IPV6-NAMESERVER]\n"
     exit 1
 fi
 
