@@ -4,7 +4,7 @@
 ############### FUNCTIONS ###############
 #########################################
 
-############### Static IP configuration
+############### Static IP configuration ###############
 static_netplan_config() {
 cat > "$NETPLAN_FILE" <<EOF
 network:
@@ -33,7 +33,7 @@ EOF
 [ -n "$IPV6_NAMESERVER" ] && echo "          - $IPV6_NAMESERVER" >> "$NETPLAN_FILE"
 }
 
-############### Dynamic IP configuration
+############### Dynamic IP configuration ###############
 dynamic_netplan_config() {
 cat > "$NETPLAN_FILE" <<EOF
 network:
