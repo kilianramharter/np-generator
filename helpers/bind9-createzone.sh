@@ -98,42 +98,38 @@ if [[ $# -eq 1 ]]; then
 fi
 
 createwithjson() {
-    if jq -e '.zones | length > 0' "$JSON_FILE" >/dev/null; then
+    if jq -e '.ZONES | length > 0' "$JSON_FILE" >/dev/null; then
         echo "JSON file contains zones, proceeding with zone creation..."
     else
         echo "No zones found in JSON file, exiting."
         exit 1
     fi
 
-    zone_count=$(jq '.zones | length' "$JSON_FILE")
+    zone_count=$(jq '.ZONES | length' "$JSON_FILE")
 
     echo "Starting Zone file creation ..."
     for i in $(seq 0 $((zone_count - 1))); do
-        ZONE=$(jq -r ".zones[$i].ZONE" "$JSON_FILE")
-        REMOTE_ROLE=$(jq -r ".zones[$i].REMOTE_ROLE" "$JSON_FILE")
-        MASTERS_IP=$(jq -r ".zones[$i].MASTERS_IP" "$JSON_FILE")
-        TRANSFER_IP=$(jq -r ".zones[$i].TRANSFER_IP" "$JSON_FILE")
-        NAMESERVER_IP=$(jq -r ".zones[$i].NAMESERVER_IP" "$JSON_FILE")
-        EMAIL=$(jq -r ".zones[$i].EMAIL" "$JSON_FILE")
-        if jq -e '.options | has("options.NAMED_CONF_LOCAL.")' "$JSON_FILE" >/dev/null; then
-            NAMED_CONF_LOCAL=$(jq -r '.options.NAMED_CONF_LOCAL' "$JSON_FILE")
-        fi
-        if jq -e '.options | has("option")' "$JSON_FILE" >/dev/null; then
-            NAMED_CONF_LOCAL=$(jq -r '.options.NAMED_CONF_LOCAL' "$JSON_FILE")
-
+        ZONE=$(jq -r ".ZONES[$i].ZONE" "$JSON_FILE")
+        REMOTE_ROLE=$(jq -r ".ZONES[$i].REMOTE_ROLE" "$JSON_FILE")
+        MASTERS_IP=$(jq -r ".ZONES[$i].MASTERS_IP" "$JSON_FILE")
+        TRANSFER_IP=$(jq -r ".ZONES[$i].TRANSFER_IP" "$JSON_FILE")
+        NAMESERVER_IP=$(jq -r ".ZONES[$i].NAMESERVER_IP" "$JSON_FILE")
+        EMAIL=$(jq -r ".ZONES[$i].EMAIL" "$JSON_FILE")
+        if jq -e '.OPTIONS | has("FILE")' "$JSON_FILE" >/dev/null; then
+            NAMED_CONF_LOCAL=$(jq -r '.OPTIONS.FILE' "$JSON_FILE")
         fi
         create_zone_file
         update_named_conf_local
 
     done
 
-    if jq -e '.zones[0] | has("option")' "$JSON_FILE" >/dev/null; then
+    if jq -e '. | has("OPTIONS")' "$JSON_FILE" >/dev/null; then
         echo "configuring named.conf.options ..."
-        ALLOW_RECURSION=$(jq -r '.zones[0].option.ALLOW_RECURSION' "$JSON_FILE")
-        DNSSEC_VALIDATION=$(jq -r '.zones[0].option.DNSSEC_VALIDATION' "$JSON_FILE")
-        NOTIFY=$(jq -r '.zones[0].option.NOTIFY' "$JSON_FILE")
-        if jq -e '.zones[0] | has("option")' "$JSON_FILE" >/dev/null; then
-            NAMED_CONF_OPTIONS=$(jq -r '.zones[0].option.NAMED_CONF_OPTIONS' "$JSON_FILE")
+        ALLOW_RECURSION=$(jq -r '.OPTIONS.ALLOW_RECURSION' "$JSON_FILE")
+        DNSSEC_VALIDATION=$(jq -r '.OPTIONS.DNSSEC_VALIDATION' "$JSON_FILE")
+        NOTIFY=$(jq -r '.OPTIONS.NOTIFY' "$JSON_FILE")
+        if jq -e '.OPTIONS | has("FILE")' "$JSON_FILE" >/dev/null; then
+            NAMED_CONF_OPTIONS=$(jq -r '.OPTIONS.FILE' "$JSON_FILE")
             /bin/bash ./bind9-config.sh $ALLOW_RECURSION $DNSSEC_VALIDATION $NOTIFY $NAMED_CONF_OPTIONS
         else
             /bin/bash ./bind9-config.sh $ALLOW_RECURSION $DNSSEC_VALIDATION $NOTIFY

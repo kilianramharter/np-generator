@@ -1,14 +1,14 @@
 {
   "ZONES_DIR": "/etc/bind/zones",
   "CACHE_DIR": "/var/cache/bind",
-  "options": {
-    "directory": "/etc/bind/named.conf.options",
-    "allow-transfer": "yes",
-    "recursion": "yes",
-    "dnssec-validation": "no",
-    "notify": "yes"
+  "OPTIONS": {
+    "FILE": "/etc/bind/named.conf.options",
+    "ALLOW-TRANSFER": "yes",
+    "RECURSION": "yes",
+    "DNSSEC-VALIDATION": "no",
+    "NOTIFY": "yes"
   },
-  "zones": [
+  "ZONES": [
     {
       "ZONE": "medientechnik.org",
       "REMOTE_ROLE": "NONE",
