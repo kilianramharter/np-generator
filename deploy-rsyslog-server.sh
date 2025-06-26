@@ -67,13 +67,4 @@ systemctl restart rsyslog
 systemctl enable rsyslog > /dev/null 2>&1
 echo -e "\e[1;32mdone\e[0m"
 
-################### Firewall #####################
-if command -v ufw > /dev/null; then
-    if ufw status | grep -qw "active"; then
-        echo -n "Disabling UFW firewall... "
-        ufw disable > /dev/null 2>&1
-        echo -e "\e[1;32mdone\e[0m"
-    fi
-fi
-
 echo -e "\033[1;32mRsyslog server setup is complete.\033[0m"
