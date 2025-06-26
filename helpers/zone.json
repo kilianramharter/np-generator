@@ -1,0 +1,32 @@
+{
+  "ZONES_DIR": "/etc/bind/zones",
+  "CACHE_DIR": "/var/cache/bind",
+  "options": {
+    "directory": "/etc/bind/named.conf.options",
+    "allow-transfer": "yes",
+    "recursion": "yes",
+    "dnssec-validation": "no",
+    "notify": "yes"
+  },
+  "zones": [
+    {
+      "ZONE": "medientechnik.org",
+      "REMOTE_ROLE": "NONE",
+      "MASTERS_IP": "",
+      "TRANSFER_IP": "",
+      "NAMESERVER_IP": "",
+      "EMAIL": "postmaster.medientechnik.org"
+    },
+    {
+      "ZONE": "example.com",
+      "REMOTE_ROLE": "SLAVE",
+      "ALLOW_RECURSION": "no",
+      "MASTERS_IP": "192.0.2.1",
+      "TRANSFER_IP": "198.51.100.10",
+      "NAMESERVER_IP": "203.0.113.5",
+      "EMAIL": "postmaster.example.com"
+    }
+  ]
+  
+
+}
