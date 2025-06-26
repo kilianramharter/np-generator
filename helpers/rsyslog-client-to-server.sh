@@ -18,9 +18,9 @@ RSYSLOG_LOG_LEVEL="$3"
 RSYSLOG_CONFIG_FILE="/etc/rsyslog.d/90-remote.conf"
 
 # Set a single "@" for UDP or "@@" for TCP
-if [[ "$RSYSLOG_UDP_TCP" == "tcp" ]]; then
+if [[ "$RSYSLOG_UDP_TCP" == "udp" ]]; then
     RSYSLOG_SERVER_IP="@${RSYSLOG_SERVER_IP}"
-elif [[ "$RSYSLOG_UDP_TCP" == "udp" ]]; then
+elif [[ "$RSYSLOG_UDP_TCP" == "tcp" ]]; then
     RSYSLOG_SERVER_IP="@@${RSYSLOG_SERVER_IP}"
 else
     echo -e "\033[1;31mInvalid protocol. Use 'udp' or 'tcp'.\033[0m"
