@@ -82,20 +82,6 @@ showdata() {
     # Here you can put the actual setup logic
 }
 
-verify()
-
-# Main
-
-JSON_FILE="$1"
-
-if [[ $# -eq 1 ]]; then
-    echo "Loading configuration from JSON file: $JSON_FILE"
-    if ! [[ -f "$JSON_FILE" ]]; then
-        echo "File not found: $JSON_FILE"
-        exit 1
-    fi
-    createwithjson
-fi
 
 createwithjson() {
     if jq -e '.ZONES | length > 0' "$JSON_FILE" >/dev/null; then
@@ -138,3 +124,19 @@ createwithjson() {
         #./bind9-config.sh {ALLOW_RECURSION} {DNSSEC_VALIDATION} {NOTIFY} [NAMED_CONF_OPTIONS]
     fi
 }
+
+# Main
+
+
+
+if [[ $# -eq 1 ]]; then
+    echo "Loading configuration from JSON file: $JSON_FILE"
+    if ! [[ -f "$JSON_FILE" ]]; then
+        echo "File not found: $JSON_FILE"
+        exit 1
+    fi
+    JSON_FILE=$1
+    createwithjson
+fi
+
+
