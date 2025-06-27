@@ -3,7 +3,6 @@
 # Manual config
 ZONES_DIR="/etc/bind/zones"
 CACHE_DIR="/var/cache/bind"
-NAMED_CONF_LOCAL="/etc/bind/named.conf.local"
 
 ZONE="medientechnik.org"
 REMOTE_ROLE="MASTER" # MASTER or SLAVE OR NONE
@@ -104,6 +103,12 @@ createwithjson() {
         if jq -e '.OPTIONS | has("FILE")' "$JSON_FILE" >/dev/null; then
             NAMED_CONF_LOCAL=$(jq -r '.OPTIONS.FILE' "$JSON_FILE")
         fi
+        if jq -e '. | has("ZONE_DIR")' "$JSON_FILE" >/dev/null; then
+            ZONES_DIR=$(jq -r '.ZONE_DIR' "$JSON_FILE")
+        fi
+        if jq -e '. | has("CACHE_DIR")' "$JSON_FILE" >/dev/null; then
+            CACHE_DIR=$(jq -r '.CACHE_DIR' "$JSON_FILE")
+        fi
         create_zone_file
         update_named_conf_local
 
@@ -130,12 +135,12 @@ createwithjson() {
 
 
 if [[ $# -eq 1 ]]; then
+    JSON_FILE=$1
     echo "Loading configuration from JSON file: $JSON_FILE"
     if ! [[ -f "$JSON_FILE" ]]; then
         echo "File not found: $JSON_FILE"
         exit 1
     fi
-    JSON_FILE=$1
     createwithjson
 fi
 
