@@ -193,11 +193,11 @@ EOF
       TEMP_DIR=$(mktemp -d)
       trap 'rm -rf "$TEMP_DIR"' EXIT
 
-      echo "Generating self-signed certificate with the following parameters:"
-      echo "Common Name: $COMMON_NAME"
-      echo "Email: $EMAIL"
-      echo "Validity: $DAYS_VALID days"
-      echo "Key Length: $KEY_LENGTH bits"
+      # echo "Generating self-signed certificate with the following parameters:"
+      # echo "Common Name: $COMMON_NAME"
+      # echo "Email: $EMAIL"
+      # echo "Validity: $DAYS_VALID days"
+      # echo "Key Length: $KEY_LENGTH bits"
 
       # Generate private key and certificate
       openssl req -x509 -nodes -days "$DAYS_VALID" -newkey "rsa:$KEY_LENGTH" \
@@ -215,7 +215,7 @@ EOF
       mkdir -p "$(dirname "$KEY_FILE")"
 
       # Move files to their final locations (with force overwrite)
-      echo "Installing certificate files..."
+      # echo "Installing certificate files..."
       mv -f "$TEMP_DIR/temp.pem" "$CERT_FILE"
       mv -f "$TEMP_DIR/temp.key" "$KEY_FILE"
 
@@ -224,10 +224,8 @@ EOF
       chmod 640 "$KEY_FILE"
       chown root:ssl-cert "$KEY_FILE"
 
-      echo "Successfully created and installed:"
-      echo "Certificate: $CERT_FILE, Private Key: $KEY_FILE"
-    else
-      echo "No SSL configuration for $DOMAIN, skipping..."
+      # echo "Successfully created and installed:"
+      # echo "Certificate: $CERT_FILE, Private Key: $KEY_FILE"
     fi
 
     if [[ "$MODE" == "wordpress" ]]; then
