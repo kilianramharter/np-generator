@@ -58,7 +58,7 @@ if [[ $# -gt 0 ]]; then
     ALLOW_RECURSION=$1
     DNSSEC_VALIDATION=$2
     NOTIFY=$3
-    if [[ $# -gt 3]]; then
+    if [[ $# -gt 3 ]]; then
         NAMED_CONF_OPTIONS=$4
     fi
 fi

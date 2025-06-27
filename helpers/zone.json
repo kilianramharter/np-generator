@@ -1,5 +1,5 @@
 {
-  "ZONES_DIR": "/etc/bind/zones",
+  "ZONE_DIR": "/etc/bind/zones",
   "CACHE_DIR": "/var/cache/bind",
   "OPTIONS": {
     "FILE": "/etc/bind/named.conf.options",
