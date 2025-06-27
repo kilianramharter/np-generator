@@ -257,30 +257,33 @@ done
 
 
 ############### Networking ################
-echo -n "Setting up networking... "
+# echo -n "Setting up networking... "
 
-cat > /etc/netplan/50-cloud-init.yaml <<EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    $SERVER_INTERFACE:
-      addresses:
-        - $IPV4_SERVER_IP/$IPV4_SERVER_SUBNETMASK
-        - $IPV6_SERVER_IP/$IPV6_SERVER_SUBNETMASK
-      routes:
-        - to: default
-          via: $IPV4_SERVER_GATEWAY
-        - to: default
-          via: $IPV6_SERVER_GATEWAY
-      nameservers:
-          addresses:
-            - $IPV4_SERVER_NAMESERVER
-            - $IPV6_SERVER_NAMESERVER
-EOF
+# Run network setup script located in helpers/netplan-config.sh
+./helpers/netplan-config.sh "$SERVER_INTERFACE" "$IPV4_SERVER_IP/$IPV4_SERVER_SUBNETMASK" "$IPV4_SERVER_GATEWAY" "$IPV4_SERVER_NAMESERVER" "$IPV6_SERVER_IP/$IPV6_SERVER_SUBNETMASK" "$IPV6_SERVER_GATEWAY" "$IPV6_SERVER_NAMESERVER"
 
-netplan apply
-echo -e "\e[1;32mdone\e[0m"
+# cat > /etc/netplan/50-cloud-init.yaml <<EOF
+# network:
+#   version: 2
+#   renderer: networkd
+#   ethernets:
+#     $SERVER_INTERFACE:
+#       addresses:
+#         - $IPV4_SERVER_IP/$IPV4_SERVER_SUBNETMASK
+#         - $IPV6_SERVER_IP/$IPV6_SERVER_SUBNETMASK
+#       routes:
+#         - to: default
+#           via: $IPV4_SERVER_GATEWAY
+#         - to: default
+#           via: $IPV6_SERVER_GATEWAY
+#       nameservers:
+#           addresses:
+#             - $IPV4_SERVER_NAMESERVER
+#             - $IPV6_SERVER_NAMESERVER
+# EOF
+
+# netplan apply
+# echo -e "\e[1;32mdone\e[0m"
 
 ############### Reboot ################
 echo "Rebooting system in 5 seconds..."
