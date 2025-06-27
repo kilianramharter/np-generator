@@ -1,45 +1,22 @@
 #!/bin/bash
 
+# Manual config
 ZONES_DIR="/etc/bind/zones"
 CACHE_DIR="/var/cache/bind"
-NAMED_CONF_LOCAL="/etc/bind/named.conf.local"
-NAMED_CONF_OPTIONS="/etc/bind/named.conf.options"
+
 ZONE="medientechnik.org"
 REMOTE_ROLE="MASTER" # MASTER or SLAVE OR NONE
-ALLOW_RECURSION="yes" # yes or no
 MASTERS_IP=""
 TRANSFER_IP=""
-DNSSEC_VALIDATION="no" # yes or no or auto
 NAMESERVER_IP=""
-EMAIL="admin@${ZONE}" # Default email for SOA record
+EMAIL="postmaster.${ZONE}" # Default email for SOA record
+
+# Include options for bind9
+CREATE_OPTIONS="yes" # if yes - bind9-config script will be called
+ALLOW_RECURSION="yes" # yes or no
+DNSSEC_VALIDATION="no" # yes or no or auto
 NOTIFY="yes" # Default notify setting
-
-# Function to ask for input if not provided
- 
-ask_input() {
-    read -p "Zone name (e.g., example.com or root or none: " ZONE
-    read -p "What is the Domain Role (master/slave/none): " REMOTE_ROLE
-    if [[ "$REMOTE_ROLE" == "SLAVE" ]]; then
-        read -p "Master IP for zone transfers: " MASTERS_IP
-    elif [[ "$REMOTE_ROLE" == "MASTER" ]]; then
-        read -p "Allow Transfer from IP for this zone: " TRANSFER_IP
-    fi
-    read -p "Allow recursion? (yes/no): " ALLOW_RECURSION
-    read -p "DNSSEC VALIDATION? (yes/no/auto): " DNSSEC_VALIDATION
-    read -p "What is the IP of the nameserver for $ZONE?: " NAMESERVER_IP
-    read -p "What is the postmaster mail?: " EMAIL
-    read -p "Notify on changes? (yes/no): " NOTIFY
-}
-
-# # Function to parse JSON input file
-# parse_json() {
-#     ZONE=$(jq -r '.zone' "$1")
-#     IS_REMOTE=$(jq -r '.is_remote // "no"' "$1")
-#     MASTERS=$(jq -r '.masters // empty' "$1")
-#     ALLOW_RECURSION=$(jq -r '.allow_recursion // "no"' "$1")
-# }
-
-# Function to update named.conf.options
+NAMED_CONF_OPTIONS="/etc/bind/named.conf.options"
 
 # Function to create zone file
 create_zone_file() {
@@ -69,39 +46,6 @@ EOF
 }
 
 # Function to update named.conf.local
-old_update_named_conf_local() {
-    if [[ "$REMOTE_ROLE" == "SLAVE" ]]; then
-        cat >> "$NAMED_CONF_LOCAL" <<EOF
-
-zone "${ZONE}" {
-    type slave;
-    file "${ZONES_DIR}/db.${ZONE}.zone";
-    masters { ${MASTERS}; };
-};
-EOF
-    elif [[ "$REMOTE_ROLE" == "MASTER" ]]; then
-        cat >> "$NAMED_CONF_LOCAL" <<EOF
-
-zone "${ZONE}" {
-    type master;
-    file "${ZONES_DIR}/db.${ZONE}.zone";
-    allow-transfer { ${TRANSFER_IP}; };
-EOF
-        if [[ "$NOTIFY" == "yes" ]]; then
-            echo "  also-notify { ${TRANSFER_IP}; };" >> "$NAMED_CONF_LOCAL"
-        fi
-        echo "};" >> "$NAMED_CONF_LOCAL"
-
-    else
-        cat >> "$NAMED_CONF_LOCAL" <<EOF
-zone "${ZONE}" {
-    type master;
-    file "${ZONES_DIR}/db.${ZONE}.zone";
-};
-EOF
-    fi
-    echo "Updated $NAMED_CONF_LOCAL"
-}
 
 update_named_conf_local(){
     echo "" >> "$NAMED_CONF_LOCAL"
@@ -122,20 +66,82 @@ update_named_conf_local(){
     fi
     echo "    };" >> "$NAMED_CONF_LOCAL"      
 }
+
+showdata() {
+    echo "Setting up zone: $ZONE"
+    echo "  ZONES_DIR: $ZONES_DIR"
+    echo "  CACHE_DIR: $CACHE_DIR"
+    echo "  NAMED_CONF_LOCAL: $NAMED_CONF_LOCAL"
+    echo "  REMOTE_ROLE: $REMOTE_ROLE"
+    echo "  ALLOW_RECURSION: $ALLOW_RECURSION"
+    echo "  MASTERS_IP: $MASTERS_IP"
+    echo "  TRANSFER_IP: $TRANSFER_IP"
+    echo "  NAMESERVER_IP: $NAMESERVER_IP"
+    echo "  EMAIL: $EMAIL"
+    # Here you can put the actual setup logic
+}
+
+
+createwithjson() {
+    if jq -e '.ZONES | length > 0' "$JSON_FILE" >/dev/null; then
+        echo "JSON file contains zones, proceeding with zone creation..."
+    else
+        echo "No zones found in JSON file, exiting."
+        exit 1
+    fi
+
+    zone_count=$(jq '.ZONES | length' "$JSON_FILE")
+
+    echo "Starting Zone file creation ..."
+    for i in $(seq 0 $((zone_count - 1))); do
+        ZONE=$(jq -r ".ZONES[$i].ZONE" "$JSON_FILE")
+        REMOTE_ROLE=$(jq -r ".ZONES[$i].REMOTE_ROLE" "$JSON_FILE")
+        MASTERS_IP=$(jq -r ".ZONES[$i].MASTERS_IP" "$JSON_FILE")
+        TRANSFER_IP=$(jq -r ".ZONES[$i].TRANSFER_IP" "$JSON_FILE")
+        NAMESERVER_IP=$(jq -r ".ZONES[$i].NAMESERVER_IP" "$JSON_FILE")
+        EMAIL=$(jq -r ".ZONES[$i].EMAIL" "$JSON_FILE")
+        if jq -e '.OPTIONS | has("FILE")' "$JSON_FILE" >/dev/null; then
+            NAMED_CONF_LOCAL=$(jq -r '.OPTIONS.FILE' "$JSON_FILE")
+        fi
+        if jq -e '. | has("ZONE_DIR")' "$JSON_FILE" >/dev/null; then
+            ZONES_DIR=$(jq -r '.ZONE_DIR' "$JSON_FILE")
+        fi
+        if jq -e '. | has("CACHE_DIR")' "$JSON_FILE" >/dev/null; then
+            CACHE_DIR=$(jq -r '.CACHE_DIR' "$JSON_FILE")
+        fi
+        create_zone_file
+        update_named_conf_local
+
+    done
+
+    if jq -e '. | has("OPTIONS")' "$JSON_FILE" >/dev/null; then
+        echo "configuring named.conf.options ..."
+        ALLOW_RECURSION=$(jq -r '.OPTIONS.ALLOW_RECURSION' "$JSON_FILE")
+        DNSSEC_VALIDATION=$(jq -r '.OPTIONS.DNSSEC_VALIDATION' "$JSON_FILE")
+        NOTIFY=$(jq -r '.OPTIONS.NOTIFY' "$JSON_FILE")
+        if jq -e '.OPTIONS | has("FILE")' "$JSON_FILE" >/dev/null; then
+            NAMED_CONF_OPTIONS=$(jq -r '.OPTIONS.FILE' "$JSON_FILE")
+            /bin/bash ./bind9-config.sh $ALLOW_RECURSION $DNSSEC_VALIDATION $NOTIFY $NAMED_CONF_OPTIONS
+        else
+            /bin/bash ./bind9-config.sh $ALLOW_RECURSION $DNSSEC_VALIDATION $NOTIFY
+        fi
+
+        #./bind9-config.sh {ALLOW_RECURSION} {DNSSEC_VALIDATION} {NOTIFY} [NAMED_CONF_OPTIONS]
+    fi
+}
+
 # Main
-if [[ "$1" == *.json && -f "$1" ]]; then
-    parse_json "$1"
-elif [[ -n "$1" ]]; then
-    ZONE="$1"
-    IS_REMOTE="${2:-no}"
-    MASTERS="${3:-}"
-    ALLOW_RECURSION="${4:-no}"
-else
-    ask_input
+
+
+
+if [[ $# -eq 1 ]]; then
+    JSON_FILE=$1
+    echo "Loading configuration from JSON file: $JSON_FILE"
+    if ! [[ -f "$JSON_FILE" ]]; then
+        echo "File not found: $JSON_FILE"
+        exit 1
+    fi
+    createwithjson
 fi
 
-if [[ "$ZONE" != "none"  ]]; then
-    create_zone_file
-    update_named_conf_local
-fi
-update_named_conf_options
+
