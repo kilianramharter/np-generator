@@ -23,7 +23,6 @@ NAMED_CONF_OPTIONS="/etc/bind/named.conf.options"
 create_zone_file() {
     if [[ $ZONE == "root" ]]; then
         ZONE_FILE="$ZONES_DIR/db.root.zone"
-    fi
     else
         ZONE_FILE="$ZONES_DIR/db.${ZONE}.zone"
     fi
@@ -65,7 +64,6 @@ EOF
 update_named_conf_local(){
     if [[ $ZONE == "root" ]]; then
         ZONE_FILE="$ZONES_DIR/db.root.zone"
-    fi
     else
         ZONE_FILE="$ZONES_DIR/db.${ZONE}.zone"
     fi
