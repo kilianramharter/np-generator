@@ -21,12 +21,18 @@ NAMED_CONF_OPTIONS="/etc/bind/named.conf.options"
 
 # Function to create zone file
 create_zone_file() {
-    ZONE_FILE="$ZONES_DIR/db.${ZONE}.zone"
+    if [[ $ZONE == "root" ]]; then
+        ZONE_FILE="$ZONES_DIR/db.root.zone"
+    fi
+    else
+        ZONE_FILE="$ZONES_DIR/db.${ZONE}.zone"
+    fi
     mkdir -p "$ZONES_DIR"
 
     if [[ "$REMOTE_ROLE" != "SLAVE" ]]; then
         cat > "$ZONE_FILE" <<EOF
 \$TTL    86400
+\$ORIGIN ${ZONE}.
 @       IN      SOA     ns1.${ZONE}. ${EMAIL}. (
                         2025062301 ; Serial
                         3600       ; Refresh
@@ -35,12 +41,20 @@ create_zone_file() {
                         86400 )    ; Minimum TTL
 
         IN      NS      ns1.${ZONE}.
-ns1.${ZONE}     IN      A       ${NAMESERVER_IP}
+ns1.${ZONE}.     IN      A       ${NAMESERVER_IP}
+
+
 ; Example records:
-; ns1.${ZONE}     IN      A       180.1.10.2
-; www     IN      A       192.0.2.1
-; ipv6    IN      AAAA    2001:db8::1
-; alias   IN      CNAME   www.${ZONE}.
+
+
+; ns1.${ZONE}.     IN      A       180.1.10.2
+; ${ZONE}.         IN      MX 10   mail.${ZONE}.
+; mail.${ZONE}.    IN      A       180.1.10.20
+; www.${ZONE}.     IN      A       180.1.10.30
+; nerd.${ZONE}.    IN      CNAME   www.${ZONE}.
+
+; Additional records can be added below
+
 EOF
         echo "Created zone file: $ZONE_FILE"
     fi
@@ -49,21 +63,34 @@ EOF
 # Function to update named.conf.local
 
 update_named_conf_local(){
+    if [[ $ZONE == "root" ]]; then
+        ZONE_FILE="$ZONES_DIR/db.root.zone"
+    fi
+    else
+        ZONE_FILE="$ZONES_DIR/db.${ZONE}.zone"
+    fi
+
     echo "" >> "$NAMED_CONF_LOCAL"
     if [[ "$ZONE" == "root" ]]; then
         echo "zone \".\" {" >> "$NAMED_CONF_LOCAL"
     else
         echo "zone \"${ZONE}.\" {" >> "$NAMED_CONF_LOCAL"
     fi
-    echo "    type ${REMOTE_ROLE};" >> "$NAMED_CONF_LOCAL"
-    if [[ "$REMOTE_ROLE" == "master" || "$REMOTE_ROLE" == "none" ]]; then
-        echo "    masters { ${MASTERS_IP}; };" >> "$NAMED_CONF_LOCAL"
-        if [[ "$REMOTE_ROLE" == "master" ]]; then
-            echo "    allow-transfer { ${TRANSFER_IP}; };" >> "$NAMED_CONF_LOCAL"
-        fi
-    elif [[ "$REMOTE_ROLE" == "slave" ]]; then
-        echo '    file "'${CACHE_DIR}'/db.'${ZONE}'.zone";' >> "$NAMED_CONF_LOCAL"
-        echo "    masters { ${MASTERS}; };" >> "$NAMED_CONF_LOCAL"
+
+    if [[ $($REMOTE_ROLE,,) == "master"  ]]; then
+        echo "    type ${REMOTE_ROLE};" >> "$NAMED_CONF_LOCAL"
+        echo "    allow-transfer { ${TRANSFER_IP}; };" >> "$NAMED_CONF_LOCAL"
+        echo '    file "'${ZONE_DIR}'/'${ZONE_FILE}'";' >> "$NAMED_CONF_LOCAL"
+    fi
+
+    if [[ $($REMOTE_ROLE,,) == "none" ]]; then
+        echo "    type master;" >> "$NAMED_CONF_LOCAL"
+        echo '    file "'${ZONE_DIR}'/db.'${ZONE}'.zone";' >> "$NAMED_CONF_LOCAL"
+    fi
+        
+    if [[ $($REMOTE_ROLE,,) == "slave" ]]; then
+        echo '    file "'${ZONE_DIR}'/db.'${ZONE}'.zone";' >> "$NAMED_CONF_LOCAL"
+        echo "    masters { ${MASTER_IP}; };" >> "$NAMED_CONF_LOCAL"
     fi
     echo "    };" >> "$NAMED_CONF_LOCAL"      
 }
