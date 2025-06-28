@@ -63,9 +63,9 @@ EOF
 
 update_named_conf_local(){
     if [[ $ZONE == "root" ]]; then
-        ZONE_FILE="$ZONES_DIR/db.root.zone"
+        ZONE_FILE="db.root.zone"
     else
-        ZONE_FILE="$ZONES_DIR/db.${ZONE}.zone"
+        ZONE_FILE="db.${ZONE}.zone"
     fi
 
     echo "" >> "$NAMED_CONF_LOCAL"
@@ -75,20 +75,21 @@ update_named_conf_local(){
         echo "zone \"${ZONE}.\" {" >> "$NAMED_CONF_LOCAL"
     fi
 
-    if [[ $($REMOTE_ROLE,,) == "master"  ]]; then
+    if [[ "${REMOTE_ROLE,,}" == "master"  ]]; then
         echo "    type ${REMOTE_ROLE};" >> "$NAMED_CONF_LOCAL"
         echo "    allow-transfer { ${TRANSFER_IP}; };" >> "$NAMED_CONF_LOCAL"
-        echo '    file "'${ZONE_DIR}'/'${ZONE_FILE}'";' >> "$NAMED_CONF_LOCAL"
+        echo '    file "'${ZONES_DIR}/${ZONE_FILE}'";' >> "$NAMED_CONF_LOCAL"
     fi
 
-    if [[ $($REMOTE_ROLE,,) == "none" ]]; then
+    if [[ "${REMOTE_ROLE,,}" == "none" ]]; then
         echo "    type master;" >> "$NAMED_CONF_LOCAL"
-        echo '    file "'${ZONE_DIR}'/db.'${ZONE}'.zone";' >> "$NAMED_CONF_LOCAL"
+        echo '    file "'${ZONES_DIR}'/db.'${ZONE}'.zone";' >> "$NAMED_CONF_LOCAL"
     fi
         
-    if [[ $($REMOTE_ROLE,,) == "slave" ]]; then
-        echo '    file "'${ZONE_DIR}'/db.'${ZONE}'.zone";' >> "$NAMED_CONF_LOCAL"
-        echo "    masters { ${MASTER_IP}; };" >> "$NAMED_CONF_LOCAL"
+    if [[ "${REMOTE_ROLE,,}" == "slave" ]]; then
+        echo "    type ${REMOTE_ROLE};" >> "$NAMED_CONF_LOCAL"
+        echo '    file "'${CACHE_DIR}'/db.'${ZONE}'.zone";' >> "$NAMED_CONF_LOCAL"
+        echo "    masters { ${MASTERS_IP}; };" >> "$NAMED_CONF_LOCAL"
     fi
     echo "    };" >> "$NAMED_CONF_LOCAL"      
 }

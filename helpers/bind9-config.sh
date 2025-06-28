@@ -27,7 +27,7 @@ validate_options(){
     echo -n "Validating Bind9 Options... "
 case "$ALLOW_RECURSION" in
     yes|no) 
-    echo -e "\e Allow recursion  [1;32mvalid\e[0m"
+    echo -e "Allow recursion  \e[1;32mvalid\e[0m"
     ;;
     *) 
     echo -e "\e[1;31mfailed\e[0m"
@@ -36,7 +36,7 @@ case "$ALLOW_RECURSION" in
     esac
 case "$DNSSEC_VALIDATION" in
     yes|no|auto)
-    echo -e "DNSSEC validation [1;32mvalid\e[0m"
+    echo -e "DNSSEC validation \e[1;32mvalid\e[0m"
     ;;
     *)
     echo -e "\e[1;31mfailed\e[0m"
@@ -45,7 +45,7 @@ case "$DNSSEC_VALIDATION" in
 esac
 case "$NOTIFY" in
     yes|no)
-    echo -e "Notify on changes [1;32mvalid\e[0m"
+    echo -e "Notify on changes \e[1;32mvalid\e[0m"
     ;;
     *)
     echo -e "\e[1;31mfailed\e[0m"
