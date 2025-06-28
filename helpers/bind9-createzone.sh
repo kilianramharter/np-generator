@@ -3,6 +3,7 @@
 # Manual config
 ZONES_DIR="/etc/bind/zones"
 CACHE_DIR="/var/cache/bind"
+NAMED_CONF_LOCAL="/etc/bind/named.conf.local"
 
 ZONE="medientechnik.org"
 REMOTE_ROLE="MASTER" # MASTER or SLAVE OR NONE
@@ -100,8 +101,8 @@ createwithjson() {
         TRANSFER_IP=$(jq -r ".ZONES[$i].TRANSFER_IP" "$JSON_FILE")
         NAMESERVER_IP=$(jq -r ".ZONES[$i].NAMESERVER_IP" "$JSON_FILE")
         EMAIL=$(jq -r ".ZONES[$i].EMAIL" "$JSON_FILE")
-        if jq -e '.OPTIONS | has("FILE")' "$JSON_FILE" >/dev/null; then
-            NAMED_CONF_LOCAL=$(jq -r '.OPTIONS.FILE' "$JSON_FILE")
+        if jq -e '. | has("NAMED_CONF_LOCAL")' "$JSON_FILE" >/dev/null; then
+            NAMED_CONF_LOCAL=$(jq -r '.NAMED_CONF_LOCAL' "$JSON_FILE")
         fi
         if jq -e '. | has("ZONE_DIR")' "$JSON_FILE" >/dev/null; then
             ZONES_DIR=$(jq -r '.ZONE_DIR' "$JSON_FILE")
@@ -142,6 +143,14 @@ if [[ $# -eq 1 ]]; then
         exit 1
     fi
     createwithjson
+elif [[ $# -eq 0 ]]; then
+    echo "Creating zone with default settings..."
+    create_zone_file
+    update_named_conf_local
+    if [[ "$CREATE_OPTIONS" == "yes" ]]; then
+        echo "Configuring named.conf.options ..."
+        /bin/bash ./bind9-config.sh $ALLOW_RECURSION $DNSSEC_VALIDATION $NOTIFY $NAMED_CONF_OPTIONS
+    fi
 fi
 
 

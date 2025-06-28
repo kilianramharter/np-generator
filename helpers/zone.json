@@ -1,11 +1,12 @@
 {
   "ZONE_DIR": "/etc/bind/zones",
   "CACHE_DIR": "/var/cache/bind",
+  "NAMED_CONF_LOCAL": "/etc/bind/named.conf.local",
   "OPTIONS": {
     "FILE": "/etc/bind/named.conf.options",
-    "ALLOW-TRANSFER": "yes",
-    "RECURSION": "yes",
-    "DNSSEC-VALIDATION": "no",
+    "ALLOW_TRANSFER": "yes",
+    "ALLOW_RECURSION": "yes",
+    "DNSSEC_VALIDATION": "no",
     "NOTIFY": "yes"
   },
   "ZONES": [
@@ -20,7 +21,6 @@
     {
       "ZONE": "example.com",
       "REMOTE_ROLE": "SLAVE",
-      "ALLOW_RECURSION": "no",
       "MASTERS_IP": "192.0.2.1",
       "TRANSFER_IP": "198.51.100.10",
       "NAMESERVER_IP": "203.0.113.5",

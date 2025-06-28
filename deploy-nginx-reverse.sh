@@ -54,8 +54,7 @@ for SITE in "${PROXY_SITES[@]}"; do
     # Generate self-signed SSL certificate and key for the domain
     CERT_FILE="/etc/ssl/certs/${DOMAIN}.crt"
     KEY_FILE="/etc/ssl/private/${DOMAIN}.key"
-    openssl req -x509 -nodes -days "$SSL_CERT_DAYS" -newkey rsa:2048 \
-        -keyout "$KEY_FILE" -out "$CERT_FILE" -subj "/CN=${DOMAIN}" > /dev/null 2>&1
+    s > /dev/null 2>&1
 
     # Create Nginx site config for the domain (HTTP -> HTTPS and HTTPS proxy)
     CONFIG_PATH="/etc/nginx/sites-available/${DOMAIN}.conf"
