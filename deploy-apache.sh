@@ -20,9 +20,22 @@ VHOSTS=(
     "totallysecure.net http basic"
 )
 
+# WordPress settings
 WP_ADMIN_USER="admin"
 WP_ADMIN_PASS="admin"
 WP_ADMIN_EMAIL="admin@example.com"
+
+# Certificate metadata variables
+SSL_CERT_CN="myserver.local"
+SSL_CERT_COUNTRY="AT"
+SSL_CERT_STATE="St. Poelten"
+SSL_CERT_LOCALITY="St. Poelten"
+SSL_CERT_ORG="FH St. Poelten"
+SSL_CERT_ORG_UNIT="IT"
+SSL_CERT_EMAIL="admin@example.com"
+SSL_CERT_PATH="/etc/ssl/certs/apache-san-cert.pem"
+SSL_KEY_PATH="/etc/ssl/private/apache-san-key.pem"
+SSL_CONF_PATH="/etc/ssl/certs/apache-san-openssl.cnf"
     
 ###########################################
 # Script for Ubuntu Postfix Preparation #
@@ -121,6 +134,64 @@ echo -e "\e[1;32mdone\e[0m"
 # run hardening script
 # echo -e "\e[1;32mdone\e[0m"
 
+############## Generate SAN Certificate ##############
+# Collect all domains that require HTTPS
+HTTPS_DOMAINS=()
+for VHOST in "${VHOSTS[@]}"; do
+    read -r DOMAIN TYPE MODE <<< "$VHOST"
+    if [[ "$TYPE" == "https" || "$TYPE" == "both" ]]; then
+        HTTPS_DOMAINS+=("$DOMAIN")
+    fi
+done
+
+if [[ ${#HTTPS_DOMAINS[@]} -gt 0 ]]; then
+    echo -n "Generating self-signed SAN certificate for: ${HTTPS_DOMAINS[*]}... "
+    # Create OpenSSL config with SANs
+    cat > "$SSL_CONF_PATH" <<EOF
+[ req ]
+default_bits       = 2048
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+x509_extensions    = v3_ca
+prompt             = no
+
+[ req_distinguished_name ]
+C  = $SSL_CERT_COUNTRY
+ST = $SSL_CERT_STATE
+L  = $SSL_CERT_LOCALITY
+O  = $SSL_CERT_ORG
+OU = $SSL_CERT_ORG_UNIT
+CN = $SSL_CERT_CN
+emailAddress = $SSL_CERT_EMAIL
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ v3_ca ]
+subjectAltName = @alt_names
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+
+[ alt_names ]
+EOF
+
+    i=1
+    for d in "${HTTPS_DOMAINS[@]}"; do
+        echo "DNS.$i = $d" >> "$SSL_CONF_PATH"
+        ((i++))
+    done
+
+    # Generate key and cert if not already present
+    if [[ ! -f "$SSL_CERT_PATH" || ! -f "$SSL_KEY_PATH" ]]; then
+        openssl req -x509 -nodes -days 825 -newkey rsa:2048 \
+            -keyout "$SSL_KEY_PATH" \
+            -out "$SSL_CERT_PATH" \
+            -config "$SSL_CONF_PATH" > /dev/null 2>&1
+    fi
+    echo -e "\e[1;32mdone\e[0m"
+fi
+
 ############## VirtualHosts ###############
 # wordpress = Installs WP + autoconfiguration (wget + WP-CLI)
 # basic = Creates index.html (that contains website name e.g.)
@@ -167,8 +238,8 @@ EOF
     ErrorLog \${APACHE_LOG_DIR}/$DOMAIN-error.log
     CustomLog \${APACHE_LOG_DIR}/$DOMAIN-access.log combined
     SSLEngine on
-    SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
-    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+    SSLCertificateFile $SSL_CERT_PATH
+    SSLCertificateKeyFile $SSL_KEY_PATH
     <FilesMatch ".(?:cgi|shtml|phtml|php)$">
       SSLOptions +StdEnvVars 
     </FilesMatch>
@@ -178,54 +249,6 @@ EOF
 </VirtualHost>
 EOF
       a2ensite "$DOMAIN.https.conf" > /dev/null
-
-      # Configuration parameters - customize these values
-      COMMON_NAME="$DOMAIN"         # Domain name or IP
-      EMAIL="admin@$DOMAIN"         # Admin email
-      DAYS_VALID=365                # Certificate validity in days
-      KEY_LENGTH=4096               # RSA key length (2048 or 4096)
-
-      # File locations - standard Debian/Ubuntu Apache paths
-      CERT_FILE="/etc/ssl/certs/ssl-cert-$DOMAIN.pem"
-      KEY_FILE="/etc/ssl/private/ssl-cert-$DOMAIN.key"
-
-      # Create temporary directory
-      TEMP_DIR=$(mktemp -d)
-      trap 'rm -rf "$TEMP_DIR"' EXIT
-
-      # echo "Generating self-signed certificate with the following parameters:"
-      # echo "Common Name: $COMMON_NAME"
-      # echo "Email: $EMAIL"
-      # echo "Validity: $DAYS_VALID days"
-      # echo "Key Length: $KEY_LENGTH bits"
-
-      # Generate private key and certificate
-      openssl req -x509 -nodes -days "$DAYS_VALID" -newkey "rsa:$KEY_LENGTH" \
-          -keyout "$TEMP_DIR/temp.key" -out "$TEMP_DIR/temp.pem" \
-          -subj "/C=AT/ST=Lower Austria/L=St. Poelten/O=FH St. Poelten/OU=itsec/CN=$COMMON_NAME/emailAddress=$EMAIL"
-
-      # Verify the files were created
-      if [ ! -f "$TEMP_DIR/temp.key" ] || [ ! -f "$TEMP_DIR/temp.pem" ]; then
-          echo "ERROR: Failed to generate certificate files." >&2
-          exit 1
-      fi
-
-      # Create target directories if they don't exist
-      mkdir -p "$(dirname "$CERT_FILE")"
-      mkdir -p "$(dirname "$KEY_FILE")"
-
-      # Move files to their final locations (with force overwrite)
-      # echo "Installing certificate files..."
-      mv -f "$TEMP_DIR/temp.pem" "$CERT_FILE"
-      mv -f "$TEMP_DIR/temp.key" "$KEY_FILE"
-
-      # Set proper permissions
-      chmod 644 "$CERT_FILE"
-      chmod 640 "$KEY_FILE"
-      chown root:ssl-cert "$KEY_FILE"
-
-      # echo "Successfully created and installed:"
-      # echo "Certificate: $CERT_FILE, Private Key: $KEY_FILE"
     fi
 
     if [[ "$MODE" == "wordpress" ]]; then
